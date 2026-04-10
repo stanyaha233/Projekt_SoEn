@@ -1,16 +1,23 @@
-case class Karte(farbe: String, wert: String)
+package kartenspiel
 
+// Hiermit importierst du alles aus dem Kartenset.scala
+import kartenspiel.Farbe
+import kartenspiel.Zahl
+
+
+case class Karte(farbe: Farbe.Value, wert: Zahl.Value)
 
 @main
 def main(): Unit = {
-  val mitte = Karte("Rot", "7")
-  val karte1 = Karte("Blau", "3")
-  val karte2 = Karte("Grün", "Skip")
-  val karte3 = Karte("Rot", "3")
-  val karte4 = Karte("Schwarz", "Wahl")
-  val karte5 = Karte("Schwarz","Plus4")
-  val karte6 = Karte("Blau", "plus2")
-  val karte7 = Karte("Grün", "Wechsel")
+
+  val mitte = Karte(Farbe.Rot, Zahl.`7`)
+  val karte1 = Karte(Farbe.Blau, Zahl.`3`)
+  val karte2 = Karte(Farbe.Gruen, Zahl.Skip)
+  val karte3 = Karte(Farbe.Rot,Zahl.`2`)
+  val karte4 = Karte(Farbe.Schwarz, Zahl.wahl)
+  val karte5 = Karte(Farbe.Schwarz,Zahl.plus4)
+  val karte6 = Karte(Farbe.Blau, Zahl.plus2)
+  val karte7 = Karte(Farbe.Gruen, Zahl.Wechsel)
 
   val hand = List(karte1, karte2, karte3)
   val handGegner = List(karte6, karte5, karte4, karte7)
@@ -25,9 +32,8 @@ def main(): Unit = {
   println("Karte 2: " + karte2.farbe + " " + karte2.wert)
   println("Karte 3: " + karte3.farbe + " " + karte3.wert)
 
-  val moeglich: Boolean = hand.exists(karte => (karte.farbe == mitte.farbe)|| (karte.wert == mitte.wert) || karte.farbe == "schwarz")
+  val moeglich = hand.exists(k => k.farbe == mitte.farbe || k.wert == mitte.wert)
 
   println(" ")
   println("Möglichkeit zu einem Zug: " + moeglich)
 }
-
