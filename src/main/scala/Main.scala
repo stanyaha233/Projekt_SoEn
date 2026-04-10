@@ -1,7 +1,8 @@
+case class Karte(farbe: String, wert: String)
+
+
 @main
 def main(): Unit = {
-  case class Karte(farbe: String, wert: String)
-
   val mitte = Karte("Rot", "7")
   val karte1 = Karte("Blau", "3")
   val karte2 = Karte("Grün", "Skip")
@@ -17,7 +18,7 @@ def main(): Unit = {
   println("Uno")
   println("Stapel: " + mitte.farbe + " " + mitte.wert)
   println(" ")
-  println("Gegner Hand Anzahl:" + handGegner.size)
+   println("Gegner Hand Anzahl:" + handGegner.size)
 
   println("Deine Hand:")
   println("Karte 1: " + karte1.farbe + " " + karte1.wert)
