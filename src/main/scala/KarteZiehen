@@ -1,0 +1,5 @@
+package uno
+
+import Main.Karte
+
+val zufallsFarbe = Random.shuffle(farben).head
