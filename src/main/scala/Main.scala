@@ -1,4 +1,4 @@
-package kartenspiel
+package uno
 
 // Hiermit importierst du alles aus dem Kartenset.scala
 import kartenspiel.Farbe
@@ -10,10 +10,11 @@ case class Karte(farbe: Farbe.Value, wert: Zahl.Value)
 @main
 def main(): Unit = {
 
-  val mitte = Karte(Farbe.Rot, Zahl.`7`)
-  val karte1 = Karte(Farbe.Blau, Zahl.`3`)
+  val mitte = Karte(Farbe.Rot, Zahl.sieben)
+
+  val karte1 = Karte(Farbe.Blau, Zahl.drei)
   val karte2 = Karte(Farbe.Gruen, Zahl.Skip)
-  val karte3 = Karte(Farbe.Rot,Zahl.`2`)
+  val karte3 = Karte(Farbe.Rot,Zahl.zwei)
   val karte4 = Karte(Farbe.Schwarz, Zahl.wahl)
   val karte5 = Karte(Farbe.Schwarz,Zahl.plus4)
   val karte6 = Karte(Farbe.Blau, Zahl.plus2)
