@@ -6,11 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="4b443155-d62e-4f3d-8242-105c537fe67f" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/Handkarten" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/Handkarten.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/KarteZiehen" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/KarteZiehen.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/Kartenset.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/Kartenset.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/scala/Kartenset" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/Kartenset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/scala/Main.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/Main.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/KarteZiehen.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/KarteZiehen.scala" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

@@ -8,16 +8,15 @@ import Handkarten.Hand
 
 
 def karteziehen(): Unit {
-    val zufallsFarbe = Random.shuffle(Farben).head
-    val zufallsZahl
+    val zufallsFarbe: String = Random.shuffle(Farben).head
+    val zufallsZahl : String
     if(zufallsFarbe != "schwarz"){
         zufallsZahl = Random.shuffle(Zahl).head
     }
     else {
         zufallsZahl = Random.shuffle(Sonderkarten).head
     }
-    val neueListe = Hand.meinekarten :+ Karte(zufallsFarbe, zufallsZahl)
-    Hand.meinekarten = neueListe
+    Hand().add(Karte(zufallsFarbe, zufallsZahl))
 
 }
 
