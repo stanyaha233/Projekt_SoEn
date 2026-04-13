@@ -1,0 +1,28 @@
+
+package uno
+
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers._
+
+class KartensetSpec extends AnyWordSpec with Matchers {
+
+  "A Hand" should {
+    "add a card to the end of the list" in {
+      val hand = new Hand().add(Card("rot", "zero"))
+
+      hand.cards.map(_.color) should contain ("rot")
+      hand.size shouldBe 1
+    }
+
+    "maintain all added cards in order" in {
+      val hand = new Hand()
+        .add(Card("rot", "zero"))
+        .add(Card("schwarz", "plus4"))
+
+      hand.cards shouldBe List(
+        Card("rot", "zero"),
+        Card("schwarz", "plus4")
+      )
+    }
+  }
+}
