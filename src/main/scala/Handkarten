@@ -1,7 +1,0 @@
-package uno
-
-import Main.Karte
-
-object Hand {
-  val meineKarten: List[Karte] = List()
-}
