@@ -1,3 +1,4 @@
+
 object Farbe extends Enumeration {
   val Rot, Gruen, Blau, Gelb = Value
 }
@@ -7,7 +8,7 @@ object Zahl extends Enumeration {
   plus2, plus4, Wechsel, Skip = Value
 }
 
-case class Karte(farbe: Farbe.Value, wert: Zahl.Value)
+case class Karte(farbe: String, wert: String)
 
 
 val meineZahl = Zahl.`1`
@@ -17,7 +18,7 @@ val meineFarbe = Farbe.Rot
 println(meineFarbe)
 val mitte = "Rot 7"
 
-val meineKarte = Karte(meineFarbe, meineZahl)
+val meineKarte = Karte(meineFarbe.toString , meineZahl.toString)
 
 val karte1 = "Rot 7"
 val karte2 = "Blau Skip"

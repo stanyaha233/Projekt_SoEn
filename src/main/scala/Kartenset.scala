@@ -5,8 +5,5 @@ object Farbe extends Enumeration {
   }
 
   object Zahl extends Enumeration {
-    val zero, eins, zwei, drei, vier, fuenf, sechs, sieben, acht, neun, Wechsel,plus2, Skip = Value
-  }
-  object Sonderkarten extends  Enumeration {
-    val plus4, wahl = Value
+    val zero, eins, zwei, drei, vier, fuenf, sechs, sieben, acht, neun, Wechsel,plus2, Skip, plus4, wahl = Value
   }

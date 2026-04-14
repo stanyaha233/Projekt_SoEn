@@ -1,10 +1,5 @@
 package uno
 
-// Hiermit importierst du alles aus dem Kartenset.scala
-import kartenspiel.Farbe
-import kartenspiel.Zahl
-
-
 case class Karte(farbe: Farbe.Value, wert: Zahl.Value)
 
 @main
