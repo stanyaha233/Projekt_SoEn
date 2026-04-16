@@ -13,7 +13,6 @@ class KarteZiehenSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "only assign 'plus4' or 'wahl' to black cards" in {
-    // Perform multiple draws to catch potential logic errors with randomness
     val draws = (1 to 100).map(_ => KarteZiehen.ziehen())
     val blackCards = draws.filter(_.farbe == Farbe.Schwarz)
 
@@ -40,7 +39,6 @@ class KarteZiehenSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "correctly supplement a partial hand to reach 7 cards" in {
-    // Assuming Hand accepts a List of cards in its constructor
     val initialHand = Hand(List(Karte(Farbe.Rot, Zahl.eins), Karte(Farbe.Blau, Zahl.zwei)))
     initialHand.anzahl should be(2)
 
@@ -49,7 +47,6 @@ class KarteZiehenSpec extends AnyFlatSpec with Matchers {
   }
 
   it should "not add any cards if the hand already has 7 or more cards" in {
-    // Creating a hand that already has 7 cards
     val fullHand = Hand((1 to 7).map(_ => KarteZiehen.ziehen()).toList)
     val resultHand = KarteZiehen.anfangskarten(fullHand)
 
