@@ -28,7 +28,7 @@ def main(): Unit = {
   println("Karte 2: " + karte2.farbe + " " + karte2.wert)
   println("Karte 3: " + karte3.farbe + " " + karte3.wert)
 
-  val moeglich = hand.exists(k => k.farbe == mitte.farbe || k.wert == mitte.wert)
+  val moeglich = hand.exists(k => k.farbe == mitte.farbe || k.wert == mitte.wert || k.farbe == Farbe.Schwarz)
 
   println(" ")
   println("Möglichkeit zu einem Zug: " + moeglich)
