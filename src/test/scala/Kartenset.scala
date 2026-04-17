@@ -7,6 +7,11 @@ class KartensetSpec extends AnyWordSpec with Matchers {
 
   "A Hand" should {
 
+    "should start with zero cards" in {
+      val hand = new Hand(List.empty)
+      hand.anzahl shouldBe 0
+    }
+
     "add a card correctly and update the count" in {
       val card = Karte(Farbe.Rot, Zahl.zero)
       val hand = new Hand(List.empty).add(card)
