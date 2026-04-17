@@ -50,7 +50,7 @@ class KarteSpec extends AnyFlatSpec with Matchers {
   it should "handle special black cards correctly (Wild cards)" in {
     val topCard = Karte(Farbe.Rot, Zahl.sieben)
     val wildCard = Karte(Farbe.Schwarz, Zahl.wahl)
-    val possible = wildCard.farbe == topCard.farbe || wildCard.wert == topCard.wert || wildCard.farbe == Farbe.Schwarz
+    val possible = wildCard.farbe == topCard.farbe || wildCard.wert == topCard.wert
 
     possible should be(false)
   }
