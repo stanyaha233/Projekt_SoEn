@@ -11,7 +11,7 @@ class KartensetSpec extends AnyWordSpec with Matchers {
       val card = Karte(Farbe.Rot, Zahl.zero)
       val hand = new Hand(List.empty).add(card)
 
-      hand.karten should contain (Karte)
+      hand.karten should contain (card)
       hand.anzahl shouldBe 1
     }
 
