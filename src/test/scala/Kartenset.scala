@@ -7,12 +7,7 @@ class KartensetSpec extends AnyWordSpec with Matchers {
 
   "A Hand" should {
     
-    "should start with zero cards" in {
-      val hand = new Hand(List.empty)
-      hand.anzahl shouldBe 0
-    }
-
-    "should start with zero cards" in {
+    "start with zero cards" in {
       val hand = new Hand(List.empty)
       hand.anzahl shouldBe 0
     }
@@ -43,6 +38,43 @@ class KartensetSpec extends AnyWordSpec with Matchers {
 
       initialHand.anzahl shouldBe 0
       newHand.anzahl shouldBe 1
+    }
+
+    // --- Neue Tests für die moeglich-Methode ---
+
+    "allow playing a card if the color matches" in {
+      val hand = new Hand(List(Karte(Farbe.Rot, Zahl.drei)))
+      val mitte = Karte(Farbe.Rot, Zahl.acht)
+      
+      hand.moeglich(mitte) shouldBe true
+    }
+
+    "allow playing a card if the value (Zahl) matches" in {
+      val hand = new Hand(List(Karte(Farbe.Blau, Zahl.acht)))
+      val mitte = Karte(Farbe.Rot, Zahl.acht)
+      
+      hand.moeglich(mitte) shouldBe true
+    }
+
+    "allow playing a card if it is a black (wild) card" in {
+      val hand = new Hand(List(Karte(Farbe.Schwarz, Zahl.plus4)))
+      val mitte = Karte(Farbe.Gruen, Zahl.fuenf)
+      
+      hand.moeglich(mitte) shouldBe true
+    }
+
+    "not allow playing a card if neither color nor value matches" in {
+      val hand = new Hand(List(Karte(Farbe.Blau, Zahl.drei)))
+      val mitte = Karte(Farbe.Rot, Zahl.acht)
+      
+      hand.moeglich(mitte) shouldBe false
+    }
+
+    "return false for moeglich if the hand is empty" in {
+      val hand = new Hand(List.empty)
+      val mitte = Karte(Farbe.Rot, Zahl.acht)
+      
+      hand.moeglich(mitte) shouldBe false
     }
   }
 }

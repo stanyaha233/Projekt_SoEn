@@ -2,7 +2,7 @@ package uno
 
 case class Karte(farbe: Farbe.Value, wert: Zahl.Value)
 
-@main
+
 def main(): Unit = {
 
   val mitte = Karte(Farbe.Rot, Zahl.sieben)
