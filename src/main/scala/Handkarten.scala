@@ -1,7 +1,7 @@
 package uno
 
-class Hand(val karten: List[Karte]) {
-  def add(karte: Karte): Hand = new Hand(karten :+ karte)
-  def anzahl: Int = karten.size
-  def moeglich(mitte: Karte): Boolean = karten.exists(k => k.farbe == mitte.farbe || k.wert == mitte.wert || k.farbe == Farbe.Schwarz)
+class Hand(val cards: List[Card]) {
+  def add(card: Card): Hand = new Hand(cards :+ card)
+  def count: Int = cards.size
+  def possible(middle: Card): Boolean = cards.exists(k => k.colour == middle.colour || k.value == middle.value || k.colour == Colour.Black)
 }
