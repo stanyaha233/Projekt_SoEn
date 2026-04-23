@@ -6,50 +6,50 @@ import org.scalatest.matchers.should.Matchers
 class KarteZiehenSpec extends AnyFlatSpec with Matchers {
 
   "ziehen" should "generate a valid card with non-null properties" in {
-    val card = KarteZiehen.ziehen()
+    val card = Draw.draw()
 
-    card.farbe shouldNot be(null)
-    card.wert shouldNot be(null)
+    card.colour shouldNot be(null)
+    card.value shouldNot be(null)
   }
 
   it should "only assign 'plus4' or 'wahl' to black cards" in {
-    val draws = (1 to 100).map(_ => KarteZiehen.ziehen())
-    val blackCards = draws.filter(_.farbe == Farbe.Schwarz)
+    val draws = (1 to 100).map(_ => Draw.draw())
+    val blackCards = draws.filter(_.colour == Colour.Black)
 
     blackCards.foreach { card =>
-      card.wert should (be(Zahl.plus4) or be(Zahl.wahl))
+      card.value should (be(Number.plus4) or be(Number.choice))
     }
   }
 
   it should "never assign 'plus4' or 'wahl' to colored cards" in {
-    val draws = (1 to 100).map(_ => KarteZiehen.ziehen())
-    val coloredCards = draws.filter(_.farbe != Farbe.Schwarz)
+    val draws = (1 to 100).map(_ => Draw.draw())
+    val coloredCards = draws.filter(_.colour != Colour.Black)
 
     coloredCards.foreach { card =>
-      card.wert shouldNot be(Zahl.plus4)
-      card.wert shouldNot be(Zahl.wahl)
+      card.value shouldNot be(Number.plus4)
+      card.value shouldNot be(Number.choice)
     }
   }
 
-  "anfangskarten" should "fill an empty hand to exactly 7 cards" in {
+  "beginningHand" should "fill an empty hand to exactly 7 cards" in {
     val emptyHand = Hand(List.empty)
-    val resultHand = KarteZiehen.anfangskarten(emptyHand)
+    val resultHand = Draw.beginningHand(emptyHand)
 
-    resultHand.anzahl should be(7)
+    resultHand.count should be(7)
   }
 
   it should "correctly supplement a partial hand to reach 7 cards" in {
-    val initialHand = Hand(List(Karte(Farbe.Rot, Zahl.eins), Karte(Farbe.Blau, Zahl.zwei)))
-    initialHand.anzahl should be(2)
+    val initialHand = Hand(List(Card(Colour.Red, Number.one), Card(Colour.Blue, Number.two)))
+    initialHand.count should be(2)
 
-    val resultHand = KarteZiehen.anfangskarten(initialHand)
-    resultHand.anzahl should be(7)
+    val resultHand = Draw.beginningHand(initialHand)
+    resultHand.count should be(7)
   }
 
   it should "not add any cards if the hand already has 7 or more cards" in {
-    val fullHand = Hand((1 to 7).map(_ => KarteZiehen.ziehen()).toList)
-    val resultHand = KarteZiehen.anfangskarten(fullHand)
+    val fullHand = Hand((1 to 7).map(_ => Draw.draw()).toList)
+    val resultHand = Draw.beginningHand(fullHand)
 
-    resultHand.anzahl should be(7)
+    resultHand.count should be(7)
   }
 }
