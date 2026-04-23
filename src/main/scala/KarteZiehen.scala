@@ -1,28 +1,25 @@
 package uno
 import scala.util.Random
 
-object KarteZiehen {
+object Draw {
 
-  def ziehen(): Karte = {
-    val alleFarben = Farbe.values.toList
-    val alleZahlen = Zahl.values.toList
+  def draw(): Card = {
+    val allColours = Colour.values.toList
+    val allNumbers = Number.values.toList
 
-    val zufallsFarbe = Random.shuffle(alleFarben).head
+    val randomColour = Random.shuffle(allColours).head
 
-    val gewaehlterWert = if (zufallsFarbe != Farbe.Schwarz) {
-      Random.shuffle(alleZahlen.filterNot(z => z == Zahl.plus4 || z == Zahl.wahl)).head    } else {
-      // Da deine Karte in Main.scala Zahl.Value erwartet,
-      // müssen wir hier schauen: Deine Sonderkarten sind in einem
-      // extra Enum. Das ist ein Problem für den Typ 'Karte'.
-      Random.shuffle(List(Zahl.wahl, Zahl.plus4)).head
+    val chosenValue = if (randomColour != Colour.Black) {
+      Random.shuffle(allNumbers.filterNot(z => z == Number.plus4 || z == Number.choice)).head    } else {
+      Random.shuffle(List(Number.choice, Number.plus4)).head
     }
-    Karte(zufallsFarbe, gewaehlterWert)
+    Card(randomColour, chosenValue)
   }
-  def anfangskarten(hand: Hand): Hand = {
-    var aktuelleHand = hand
-    while (aktuelleHand.anzahl < 7) {
-      aktuelleHand = aktuelleHand.add(ziehen())
+  def beginningHand(hand: Hand): Hand = {
+    var currentHand = hand
+    while (currentHand.count < 7) {
+      currentHand = currentHand.add(draw())
     }
-    aktuelleHand
+    currentHand
   }
 }
