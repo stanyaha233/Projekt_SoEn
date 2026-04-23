@@ -11,73 +11,73 @@ object UnoSpiel extends App {
     println("Uno")
     while (hand.count > 0 && opponentCard.count > 0) {
         println(" ")
-        println("Stapel: " + middle.colour + " " + middle.value)
+        println("Middle: " + middle.colour + " " + middle.value)
         println(" ")
-        println("Gegner Hand Anzahl: " + opponentCard.count)
+        println("Opponent Hand: " + opponentCard.count)
         println(" ")
-        println("Möglichkeit zu einem Zug: " + hand.possible(middle))
+        println("Possible Move: " + hand.possible(middle))
         println(" ")
         if (turn) {
             if (middle.value == Number.plus2) {
-                println("Du musst 2 Karten ziehen!")
+                println("You have to draw 2 cards!")
                 hand = hand.add(Draw.draw()).add(Draw.draw())
                 turn = false
             }
             else if (middle.value == Number.plus4) {
-                println("Du musst 4 Karten ziehen!")
+                println("You have to draw 4 cards!")
                 hand = hand.add(Draw.draw()).add(Draw.draw()).add(Draw.draw()).add(Draw.draw())
                 turn = false
             }
             else if (middle.value == Number.Skip) {
-                println("Der Gegner überspringt deinen Zug!")
+                println("The opponent skips your turn!")
                 turn = false
             } else if (middle.value == Number.directionChange) {
-                println("Richtungswechsel! Du darfst nochmal!")
+                println("Direction change! You get another turn!")
                 turn = true
             }
             println(" ")
             if(hand.possible(middle)) {
-                println("Deine Hand:")
+                println("Your Hand:")
         println(hand.cards.map(k => s"${k.colour} ${k.value}").mkString(", "))
         println(" ")
-            val input = scala.io.StdIn.readLine("Welche Karte möchtest du legen? (Farbe Nummer)")
+            val input = scala.io.StdIn.readLine("Which card do you want to play? (Colour Number)")
             val Array(farbeInput, wertInput) = input.split(" ")
             val chosenColour = Colour.withName(farbeInput)
             val chosenValue = Number.withName(wertInput)
             if (chosenValue == middle.value || chosenColour == middle.colour || chosenColour == Colour.Black) {
-                println(s"Du hast die Karte ${chosenColour} ${chosenValue} gelegt.")
+                println(s"You have played the card ${chosenColour} ${chosenValue}.")
                 hand = new Hand(hand.cards.filterNot(k => k.colour == chosenColour && k.value == chosenValue))
                 middle = Card(chosenColour, chosenValue)
                 turn = false
             } else {
-            println("Ungültiger Zug. Bitte versuche es erneut.")
+            println("Invalid move. Please try again.")
             println(" ")
             }
             } else {
-            println("Du musst eine Karte ziehen.")
+            println("You have to draw a card.")
             hand = hand.add(Draw.draw())
             turn = false
             }
             if (hand.count == 0) {
-            println("Herzlichen Glückwunsch! Du hast gewonnen!")
+            println("Congratulations! You have won!")
             }
         }
          else {
             if (middle.value == Number.plus2) {
-                println("Du musst 2 Karten ziehen!")
+                println("You have to draw 2 cards!")
                 hand = hand.add(Draw.draw()).add(Draw.draw())
                 turn = true
             }
             else if (middle.value == Number.plus4) {
-                println("Du musst 4 Karten ziehen!")
+                println("You have to draw 4 cards!")
                 hand = hand.add(Draw.draw()).add(Draw.draw()).add(Draw.draw()).add(Draw.draw())
                 turn = true
             }
             else if (middle.value == Number.Skip) {
-                println("Der Gegner überspringt deinen Zug!")
+                println("The opponent skips your turn!")
                 turn = true
             } else if (middle.value == Number.directionChange) {
-                println("Richtungswechsel! Du darfst nochmal!")
+                println("Direction change! You get another turn!")
                 turn = false
             }
             if(opponentCard.possible(middle)) {
@@ -86,9 +86,9 @@ object UnoSpiel extends App {
                     val card = chosenCard.head
                     opponentCard = new Hand(opponentCard.cards.filterNot(k => k.colour == card.colour && k.value == card.value))
                     middle = card
-                    println(s"Der Gegner hat die Karte ${card.colour} ${card.value} gelegt.")
+                    println(s"The opponent has played the card ${card.colour} ${card.value}.")
                 }} else {
-                println("Der Gegner muss eine Karte ziehen.")
+                println("The opponent has to draw a card.")
                 opponentCard = opponentCard.add(Draw.draw())
             }
             turn = true

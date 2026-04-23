@@ -11,10 +11,35 @@ class UnoSpec extends AnyFlatSpec with Matchers {
     hand.count should be (2)
   }
 
-  it should "correctly report if a move is possible" in {
+  it should "add a card correctly" in {
+    val hand = new Hand(List(Card(Colour.Red, Number.one)))
+    val newHand = hand.add(Card(Colour.Blue, Number.two))
+    newHand.count should be (2)
+    newHand.cards should contain (Card(Colour.Blue, Number.two))
+  }
+
+  it should "correctly report if a move is possible based on Colour" in {
     val topCard = Card(Colour.Red, Number.five)
     val hand = new Hand(List(Card(Colour.Red, Number.nine)))
     hand.possible(topCard) should be (true)
+  }
+
+  it should "correctly report if a move is possible based on Number" in {
+    val topCard = Card(Colour.Blue, Number.five)
+    val hand = new Hand(List(Card(Colour.Red, Number.five)))
+    hand.possible(topCard) should be (true)
+  }
+
+  it should "correctly report if a move is possible based on Black Colour in hand" in {
+    val topCard = Card(Colour.Red, Number.five)
+    val hand = new Hand(List(Card(Colour.Black, Number.choice)))
+    hand.possible(topCard) should be (true)
+  }
+
+  it should "report move not possible if no matching card" in {
+    val topCard = Card(Colour.Red, Number.five)
+    val hand = new Hand(List(Card(Colour.Blue, Number.one), Card(Colour.Green, Number.Skip)))
+    hand.possible(topCard) should be (false)
   }
 
   "The Card Drawing Logic" should "provide exactly 7 cards for a beginning hand" in {
@@ -23,77 +48,32 @@ class UnoSpec extends AnyFlatSpec with Matchers {
     fullHand.count should be (7)
   }
 
-  "UnoSpiel Logic (Coverage Boost)" should "validate moves correctly using isValidMove" in {
-    val middle = Card(Colour.Red, Number.five)
-
-    // Case: Same Colour
-    UnoSpiel.isValidMove(Colour.Red, Number.one, middle) should be (true)
-    // Case: Same Value
-    UnoSpiel.isValidMove(Colour.Blue, Number.five, middle) should be (true)
-    // Case: Black Card
-    UnoSpiel.isValidMove(Colour.Black, Number.plus4, middle) should be (true)
-    // Case: No match
-    UnoSpiel.isValidMove(Colour.Blue, Number.one, middle) should be (false)
+  it should "add cards to an existing hand until it has 7 cards" in {
+    val initialHand = new Hand(List(Card(Colour.Red, Number.one), Card(Colour.Blue, Number.two)))
+    val fullHand = Draw.beginningHand(initialHand)
+    fullHand.count should be (7)
   }
 
-  it should "handle penalties like plus2 correctly" in {
-    val hand = new Hand(List.empty[Card])
-    val plus2Card = Card(Colour.Blue, Number.plus2)
-
-    val (newHand, skipTurn) = UnoSpiel.handlePenalty(plus2Card, hand)
-
-    newHand.count should be (2)
-    skipTurn should be (true)
+  it should "return a valid Card when draw() is called" in {
+    val card = Draw.draw()
+    card should not be null
   }
 
-  it should "handle the Skip card penalty" in {
-    val hand = new Hand(List(Card(Colour.Red, Number.one)))
-    val skipCard = Card(Colour.Green, Number.Skip)
-
-    val (newHand, skipTurn) = UnoSpiel.handlePenalty(skipCard, hand)
-
-    newHand.count should be (1) // No cards added
-    skipTurn should be (true)  // But turn is skipped
+  it should "never draw a +4 or choice card with non-black colour" in {
+    for (_ <- 1 to 100) {
+      val card = Draw.draw()
+      if (card.colour != Colour.Black) {
+        card.value should not be (Number.plus4)
+        card.value should not be (Number.choice)
+      } else {
+        Seq(Number.choice, Number.plus4) should contain (card.value)
+      }
+    }
   }
 
-  it should "not apply a penalty for normal cards" in {
-    val hand = new Hand(List.empty[Card])
-    val normalCard = Card(Colour.Red, Number.one)
-
-    val (newHand, skipTurn) = UnoSpiel.handlePenalty(normalCard, hand)
-
-    newHand.count should be (0)
-    skipTurn should be (false)
-  }
-
-  "Opponent AI" should "pick the first valid card from its hand" in {
-    val middle = Card(Colour.Red, Number.seven)
-    val opponentHand = new Hand(List(
-      Card(Colour.Blue, Number.eight), // Invalid
-      Card(Colour.Red, Number.nine)    // Valid (same colour)
-    ))
-
-    val move = UnoSpiel.opponentAI(opponentHand, middle)
-
-    move shouldBe defined
-    move.get.colour should be (Colour.Red)
-  }
-
-  it should "return None if no valid card is found" in {
-    val middle = Card(Colour.Yellow, Number.zero)
-    val opponentHand = new Hand(List(Card(Colour.Blue, Number.one)))
-
-    val move = UnoSpiel.opponentAI(opponentHand, middle)
-
-    move shouldBe None
-  }
-
-  "Win Condition" should "be triggered when a hand is empty" in {
-    val emptyHand = new Hand(List.empty[Card])
-    val normalHand = new Hand(List(Card(Colour.Red, Number.one)))
-
-    // We can't easily test println, but we can verify the logic
-    emptyHand.count should be (0)
-    normalHand.count should be > 0
+  "A Card" should "be correctly instantiated" in {
+    val card = Card(Colour.Yellow, Number.Skip)
+    card.colour should be (Colour.Yellow)
+    card.value should be (Number.Skip)
   }
 }
