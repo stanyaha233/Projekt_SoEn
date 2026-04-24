@@ -63,6 +63,6 @@ def parseInput(input: String, state: GameState): GameState = {
       case None => state.copy(statusMessage = "Diese Karte hast du nicht!")
     }
   } catch {
-    case _: Exception => state.copy(statusMessage = "Eingabe falsch! Nutze: 'Red seven' oder 'Black plus4'")
+    case _: Exception => state.copy(statusMessage = "Eingabe falsch!")
   }
 }
