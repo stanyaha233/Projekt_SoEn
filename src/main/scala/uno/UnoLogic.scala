@@ -1,5 +1,6 @@
 package uno
 
+
 case class GameState(
                       playerHand: Hand,
                       cpuHand: Hand,
@@ -9,21 +10,20 @@ case class GameState(
                       statusMessage: String = "Spiel startet!"
                     )
 
-object UnoLogic {
 
+object UnoLogic {
   def canPlay(card: Card, state: GameState): Boolean = {
     card.colour == state.activeColour ||
-      card.value == state.pile.value ||
-      card.colour == Colour.Black
+    card.value == state.pile.value ||
+    card.colour == Colour.Black
   }
+
 
   def playCard(state: GameState, card: Card, chosenColour: Option[Colour.Value] = None): GameState = {
     if (!canPlay(card, state)) return state.copy(statusMessage = "Ungültiger Zug!")
-
     val newPlayerHand = new Hand(state.playerHand.cards.filterNot(_ == card))
     var newCpuHand = state.cpuHand
     var nextTurnIsPlayer = false
-
     val nextColour = if (card.colour == Colour.Black) chosenColour.getOrElse(Colour.Red) else card.colour
     var msg = s"Du legst ${card.colour} ${card.value}"
 
@@ -41,6 +41,7 @@ object UnoLogic {
         nextTurnIsPlayer = false
     }
 
+
     state.copy(
       playerHand = newPlayerHand,
       cpuHand = newCpuHand,
@@ -51,16 +52,15 @@ object UnoLogic {
     )
   }
 
+
   def cpuTurn(state: GameState): GameState = {
     state.cpuHand.cards.find(c => canPlay(c, state)) match {
       case Some(card) =>
         val newCpuHand = new Hand(state.cpuHand.cards.filterNot(_ == card))
         var newPlayerHand = state.playerHand
         var nextTurnIsPlayer = true
-
         val cpuWish = state.cpuHand.cards.headOption.map(_.colour).getOrElse(Colour.Red)
         val nextColour = if (card.colour == Colour.Black) cpuWish else card.colour
-
         card.value match {
           case Number.plus2 => for (_ <- 1 to 2) newPlayerHand = newPlayerHand.add(Draw.draw())
           case Number.plus4 => for (_ <- 1 to 4) newPlayerHand = newPlayerHand.add(Draw.draw())
@@ -80,6 +80,7 @@ object UnoLogic {
     }
   }
 
+
   def drawCard(state: GameState): GameState = {
     val newCard = Draw.draw()
     if (state.isPlayerTurn) {
@@ -88,4 +89,4 @@ object UnoLogic {
       state.copy(cpuHand = state.cpuHand.add(newCard), isPlayerTurn = true, statusMessage = "CPU zieht.")
     }
   }
-}
+} 
