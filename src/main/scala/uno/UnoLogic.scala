@@ -6,7 +6,8 @@ case class GameState(
                       pile: Card,
                       activeColour: Colour.Value,
                       isPlayerTurn: Boolean,
-                      statusMessage: String = "Spiel startet!"
+                      statusMessage: String = "Spiel startet!",
+                      unoSaid: Boolean = false
                     )
 
 
@@ -20,7 +21,7 @@ object UnoLogic {
 
   def playCard(state: GameState, card: Card, chosenColour: Option[Colour.Value] = None): GameState = {
     if (!canPlay(card, state)) return state.copy(statusMessage = "Ungültiger Zug!")
-    val newPlayerHand = new Hand(state.playerHand.cards.filterNot(_ == card))
+    val newPlayerHand = new Hand(state.playerHand.cards.diff(List(card)))
     var newCpuHand = state.cpuHand
     var nextTurnIsPlayer = false
     val nextColour = if (card.colour == Colour.Black) chosenColour.getOrElse(Colour.Red) else card.colour
@@ -33,7 +34,7 @@ object UnoLogic {
       case Number.plus4 =>
         for (_ <- 1 to 4) newCpuHand = newCpuHand.add(Draw.draw())
         msg += ". CPU zieht 4!"
-      case Number.Skip | Number.directionChange =>
+      case Number.skip | Number.directionchange =>
         nextTurnIsPlayer = true
         msg += ". Du bist nochmal dran!"
       case _ =>
@@ -58,12 +59,12 @@ object UnoLogic {
         val newCpuHand = new Hand(state.cpuHand.cards.filterNot(_ == card))
         var newPlayerHand = state.playerHand
         var nextTurnIsPlayer = true
-        val cpuWish = state.cpuHand.cards.headOption.map(_.colour).getOrElse(Colour.Red)
+        val cpuWish = state.cpuHand.cards.headOption.map(_.colour).find(_ != Colour.Black).getOrElse(Colour.Red)
         val nextColour = if (card.colour == Colour.Black) cpuWish else card.colour
         card.value match {
           case Number.plus2 => for (_ <- 1 to 2) newPlayerHand = newPlayerHand.add(Draw.draw())
           case Number.plus4 => for (_ <- 1 to 4) newPlayerHand = newPlayerHand.add(Draw.draw())
-          case Number.Skip | Number.directionChange => nextTurnIsPlayer = false
+          case Number.skip | Number.directionchange => nextTurnIsPlayer = false
           case _ => nextTurnIsPlayer = true
         }
 
