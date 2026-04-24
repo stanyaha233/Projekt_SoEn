@@ -1,0 +1,43 @@
+package uno
+
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, PrintStream}
+
+class UnoPlaySpec extends AnyWordSpec with Matchers {
+
+  "The parseInput function" should {
+    val dummyHand = new Hand(List(Card(Colour.Red, Number.Seven)))
+    val state = GameState(dummyHand, new Hand(Nil), Card(Colour.Red, Number.Zero), true)
+
+    "correctly process a valid card input" in {
+      val nextState = parseInput("Red Seven", state)
+      nextState.playerHand.count shouldBe 0
+      nextState.statusMessage should include("Du hast Red Seven gelegt")
+    }
+
+    "return an error message for an invalid format" in {
+      val nextState = parseInput("FalscheEingabe", state)
+      nextState.statusMessage should include("Eingabe-Format falsch")
+    }
+
+    "return an error if the player doesn't have the card" in {
+      val nextState = parseInput("Blue Zero", state)
+      nextState.statusMessage should include("Diese Karte hast du nicht")
+    }
+  }
+
+  "The Game Loop" should {
+    "terminate when a player has won" in {
+      // Wir simulieren ein Spiel, das sofort endet (Hand ist leer)
+      val winningState = GameState(new Hand(Nil), new Hand(Nil), Card(Colour.Red, Number.Zero), true)
+
+      val out = new ByteArrayOutputStream()
+      Console.withOut(new PrintStream(out)) {
+        gameLoop(winningState)
+      }
+
+      out.toString should include("GLÜCKWUNSCH")
+    }
+  }
+}
