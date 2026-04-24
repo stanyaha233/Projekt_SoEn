@@ -25,7 +25,7 @@ def gameLoop(state: GameState): Unit = {
   if (state.isPlayerTurn) {
     println(s"Deine Hand: ${state.playerHand.cards.map(c => s"[${c.colour} ${c.value}]").mkString(", ")}")
 
-    if (!state.playerHand.possible(state.pile, state.activeColour)) {
+    if (!state.playerHand.possible(state.pile)) {
       println("Du kannst nicht legen. Tippe 'draw' zum Ziehen.")
     }
 

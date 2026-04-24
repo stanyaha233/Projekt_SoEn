@@ -1,6 +1,5 @@
 package uno
 
-
 case class GameState(
                       playerHand: Hand,
                       cpuHand: Hand,

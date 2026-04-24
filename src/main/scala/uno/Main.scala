@@ -9,7 +9,7 @@ def main(): Unit = {
 
   val card1 = Card(Colour.Blue, Number.three)
   val card2 = Card(Colour.Green, Number.Skip)
-  val card3 = Card(Colour.Red,Number.two)
+  val card3 = Card(Colour.Red, Number.two)
   val card4 = Card(Colour.Black, Number.choice)
   val card5 = Card(Colour.Black,Number.plus4)
   val card6 = Card(Colour.Blue, Number.plus2)
