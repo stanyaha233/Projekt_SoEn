@@ -8,12 +8,12 @@ def main(): Unit = {
   val middle = Card(Colour.Red, Number.seven)
 
   val card1 = Card(Colour.Blue, Number.three)
-  val card2 = Card(Colour.Green, Number.Skip)
+  val card2 = Card(Colour.Green, Number.skip)
   val card3 = Card(Colour.Red, Number.two)
   val card4 = Card(Colour.Black, Number.choice)
   val card5 = Card(Colour.Black,Number.plus4)
   val card6 = Card(Colour.Blue, Number.plus2)
-  val card7 = Card(Colour.Green, Number.directionChange)
+  val card7 = Card(Colour.Green, Number.directionchange)
 
   val hand = List(card1, card2, card3)
   val handGegner = List(card6, card5, card4, card7)
