@@ -23,7 +23,8 @@ def gameLoop(state: GameState): Unit = {
   if (state.cpuHand.count == 0) return println("SCHADE! Der Gegner hat gewonnen!")
 
   if (state.isPlayerTurn) {
-    println(s"Deine Hand: ${state.playerHand.cards.map(c => s"[${c.colour} ${c.value}]").mkString(", ")}")
+    val coloredHand = state.playerHand.cards.map(c => formatCard(c)).mkString(" ")
+    println(s"Deine Hand: $coloredHand")
 
     if (!state.playerHand.possible(state.pile)) {
       println("Du kannst nicht legen. Tippe 'draw' zum Ziehen.")
