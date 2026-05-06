@@ -1,4 +1,4 @@
-package uno
+package uno.model
 import scala.util.Random
 
 object Draw {

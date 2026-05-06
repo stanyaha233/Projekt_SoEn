@@ -1,18 +1,8 @@
-package uno
-import scala.io.StdIn
+package uno.view
 
-@main def startUno(): Unit = {
-  println("=== Willkommen zu UNO ===")
-  val firstCard = Draw.draw()
-  val startState = GameState(
-    playerHand = Draw.beginningHand(Hand(Nil)),
-    cpuHand = Draw.beginningHand(Hand(Nil)),
-    pile = firstCard,
-    activeColour = if (firstCard.colour == Colour.Black) Colour.Red else firstCard.colour,
-    isPlayerTurn = true
-  )
-  gameLoop(startState)
-}
+import scala.io.StdIn
+import uno.model._
+import uno.controller.UnoLogic
 
 def gameLoop(state: GameState): Unit = {
   println(s"\n--- ${state.statusMessage} ---")

@@ -1,12 +1,12 @@
-package uno
+package uno.model
 
 object Colour extends Enumeration {
-    val Red, Green, Blue, Yellow, Black = Value
-  }
+  val Red, Green, Blue, Yellow, Black = Value
+}
 
-  object Number extends Enumeration {
-    val zero, one, two, three, four, five, six, seven, eight, nine, directionchange,plus2, skip, plus4, choice = Value
-  }
+object Number extends Enumeration {
+  val zero, one, two, three, four, five, six, seven, eight, nine, directionchange, plus2, skip, plus4, choice = Value
+}
 
 object ConsoleColors {
   val RESET  = "\u001B[0m"

@@ -1,15 +1,6 @@
-package uno
+package uno.controller
 
-case class GameState(
-                      playerHand: Hand,
-                      cpuHand: Hand,
-                      pile: Card,
-                      activeColour: Colour.Value,
-                      isPlayerTurn: Boolean,
-                      statusMessage: String = "Spiel startet!",
-                      unoSaid: Boolean = false
-                    )
-
+import uno.model._
 
 object UnoLogic {
   def canPlay(card: Card, state: GameState): Boolean = {
@@ -17,7 +8,6 @@ object UnoLogic {
     card.value == state.pile.value ||
     card.colour == Colour.Black
   }
-
 
   def playCard(state: GameState, card: Card, chosenColour: Option[Colour.Value] = None): GameState = {
     if (!canPlay(card, state)) return state.copy(statusMessage = "Ungültiger Zug!")
