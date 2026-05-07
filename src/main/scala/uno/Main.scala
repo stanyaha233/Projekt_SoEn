@@ -2,7 +2,7 @@ package uno
 
 import uno.model._
 import uno.controller.UnoLogic
-import uno.view.gameLoop
+import uno.view.UnoPlay
 
 @main def main(): Unit =
   val firstCard = Draw.draw()
@@ -16,5 +16,9 @@ import uno.view.gameLoop
     isPlayerTurn = true
   )
 
+  val controller = new UnoLogic(initialState)
+  val tui = new UnoPlay(controller)
+
   println("=== Willkommen zu UNO ===")
-  gameLoop(initialState)
+  controller.notifyObservers() // Initiale TUI Anzeige
+  tui.readInput()              // Startet die Eingabe-Schleife
