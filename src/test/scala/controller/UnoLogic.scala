@@ -4,7 +4,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import uno.model._
 
-class UnoSpec extends AnyFlatSpec with Matchers {
+class UnoLogicSpec extends AnyFlatSpec with Matchers {
 
   "A Hand" should "be initialized and add cards correctly" in {
     val hand = new Hand(List(Card(Colour.Red, Number.one)))
@@ -38,70 +38,94 @@ class UnoSpec extends AnyFlatSpec with Matchers {
   }
 
   "UnoLogic.playCard" should "handle all card types for coverage" in {
-    val state = GameState(new Hand(Nil), new Hand(Nil), Card(Colour.Red, Number.zero), Colour.Red, true)
+    val baseState = GameState(new Hand(Nil), new Hand(Nil), Card(Colour.Red, Number.zero), Colour.Red, true)
 
-    val sNormal = UnoLogic.playCard(state.copy(playerHand = new Hand(List(Card(Colour.Red, Number.five)))), Card(Colour.Red, Number.five))
-    sNormal.isPlayerTurn should be(false)
+    val logicNormal = new UnoLogic(baseState.copy(playerHand = new Hand(List(Card(Colour.Red, Number.five)))))
+    logicNormal.playCard(Card(Colour.Red, Number.five))
+    logicNormal.state.isPlayerTurn should be(false)
 
-    val sP2 = UnoLogic.playCard(state.copy(playerHand = new Hand(List(Card(Colour.Red, Number.plus2)))), Card(Colour.Red, Number.plus2))
-    sP2.cpuHand.count should be(2)
+    val logicP2 = new UnoLogic(baseState.copy(playerHand = new Hand(List(Card(Colour.Red, Number.plus2)))))
+    logicP2.playCard(Card(Colour.Red, Number.plus2))
+    logicP2.state.cpuHand.count should be(2)
 
-    val sP4 = UnoLogic.playCard(state.copy(playerHand = new Hand(List(Card(Colour.Black, Number.plus4)))), Card(Colour.Black, Number.plus4), Some(Colour.Blue))
-    sP4.cpuHand.count should be(4)
-    sP4.activeColour should be(Colour.Blue)
+    val logicP4 = new UnoLogic(baseState.copy(playerHand = new Hand(List(Card(Colour.Black, Number.plus4)))))
+    logicP4.playCard(Card(Colour.Black, Number.plus4), Some(Colour.Blue))
+    logicP4.state.cpuHand.count should be(4)
+    logicP4.state.activeColour should be(Colour.Blue)
 
-    val sSkip = UnoLogic.playCard(state.copy(playerHand = new Hand(List(Card(Colour.Red, Number.skip)))), Card(Colour.Red, Number.skip))
-    sSkip.isPlayerTurn should be(true)
+    val logicSkip = new UnoLogic(baseState.copy(playerHand = new Hand(List(Card(Colour.Red, Number.skip)))))
+    logicSkip.playCard(Card(Colour.Red, Number.skip))
+    logicSkip.state.isPlayerTurn should be(true)
 
-    val sDir = UnoLogic.playCard(state.copy(playerHand = new Hand(List(Card(Colour.Red, Number.directionchange)))), Card(Colour.Red, Number.directionchange))
-    sDir.isPlayerTurn should be(true)
+    val logicDir = new UnoLogic(baseState.copy(playerHand = new Hand(List(Card(Colour.Red, Number.directionchange)))))
+    logicDir.playCard(Card(Colour.Red, Number.directionchange))
+    logicDir.state.isPlayerTurn should be(true)
 
-    val sChoice = UnoLogic.playCard(state.copy(playerHand = new Hand(List(Card(Colour.Black, Number.choice)))), Card(Colour.Black, Number.choice), None)
-    sChoice.activeColour should be(Colour.Red)
+    val logicChoice = new UnoLogic(baseState.copy(playerHand = new Hand(List(Card(Colour.Black, Number.choice)))))
+    logicChoice.playCard(Card(Colour.Black, Number.choice), None)
+    logicChoice.state.activeColour should be(Colour.Red)
 
-    val sInvalid = UnoLogic.playCard(state, Card(Colour.Blue, Number.nine))
-    sInvalid.statusMessage should be("Ungültiger Zug!")
+    val logicInvalid = new UnoLogic(baseState)
+    logicInvalid.playCard(Card(Colour.Blue, Number.nine))
+    logicInvalid.state.statusMessage should be("Ungültiger Zug!")
   }
 
   "UnoLogic.cpuTurn" should "handle all CPU cases" in {
     val baseState = GameState(new Hand(Nil), new Hand(Nil), Card(Colour.Red, Number.zero), Colour.Red, false)
 
-    val sNormal = UnoLogic.cpuTurn(baseState.copy(cpuHand = new Hand(List(Card(Colour.Red, Number.five)))))
-    sNormal.pile.value should be(Number.five)
+    val logicNormal = new UnoLogic(baseState.copy(cpuHand = new Hand(List(Card(Colour.Red, Number.five)))))
+    logicNormal.cpuTurn()
+    logicNormal.state.pile.value should be(Number.five)
 
-    val sP2 = UnoLogic.cpuTurn(baseState.copy(cpuHand = new Hand(List(Card(Colour.Red, Number.plus2)))))
-    sP2.playerHand.count should be(2)
+    val logicP2 = new UnoLogic(baseState.copy(cpuHand = new Hand(List(Card(Colour.Red, Number.plus2)))))
+    logicP2.cpuTurn()
+    logicP2.state.playerHand.count should be(2)
 
-    val sP4 = UnoLogic.cpuTurn(baseState.copy(cpuHand = new Hand(List(Card(Colour.Black, Number.plus4)))))
-    sP4.playerHand.count should be(4)
+    val logicP4 = new UnoLogic(baseState.copy(cpuHand = new Hand(List(Card(Colour.Black, Number.plus4)))))
+    logicP4.cpuTurn()
+    logicP4.state.playerHand.count should be(4)
 
-    val sSkip = UnoLogic.cpuTurn(baseState.copy(cpuHand = new Hand(List(Card(Colour.Red, Number.skip)))))
-    sSkip.isPlayerTurn should be(false)
+    val logicSkip = new UnoLogic(baseState.copy(cpuHand = new Hand(List(Card(Colour.Red, Number.skip)))))
+    logicSkip.cpuTurn()
+    logicSkip.state.isPlayerTurn should be(false)
 
-    val sDir = UnoLogic.cpuTurn(baseState.copy(cpuHand = new Hand(List(Card(Colour.Red, Number.directionchange)))))
-    sDir.isPlayerTurn should be(false)
+    val logicDir = new UnoLogic(baseState.copy(cpuHand = new Hand(List(Card(Colour.Red, Number.directionchange)))))
+    logicDir.cpuTurn()
+    logicDir.state.isPlayerTurn should be(false)
 
-    val sDraw = UnoLogic.cpuTurn(baseState.copy(cpuHand = new Hand(List(Card(Colour.Blue, Number.nine)))))
-    sDraw.cpuHand.count should be(2)
+    val logicDraw = new UnoLogic(baseState.copy(cpuHand = new Hand(List(Card(Colour.Blue, Number.nine)))))
+    logicDraw.cpuTurn()
+    logicDraw.state.cpuHand.count should be(2)
 
     val cpuWishState = GameState(new Hand(Nil), new Hand(List(Card(Colour.Green, Number.one), Card(Colour.Black, Number.choice))), Card(Colour.Red, Number.zero), Colour.Red, false)
-    val sWish = UnoLogic.cpuTurn(cpuWishState)
-    sWish.activeColour should be(Colour.Green)
+    val logicWish = new UnoLogic(cpuWishState)
+    logicWish.cpuTurn()
+    logicWish.state.activeColour should be(Colour.Green)
   }
 
   it should "handle cpuWish logic branches" in {
     val black = Card(Colour.Black, Number.choice)
     val state1 = GameState(new Hand(Nil), new Hand(List(black)), Card(Colour.Red, Number.zero), Colour.Red, false)
-    Colour.values should contain(UnoLogic.cpuTurn(state1).activeColour)
+    val logic1 = new UnoLogic(state1)
+    logic1.cpuTurn()
+    Colour.values should contain(logic1.state.activeColour)
 
     val state2 = GameState(new Hand(Nil), new Hand(List(black, Card(Colour.Green, Number.one))), Card(Colour.Red, Number.zero), Colour.Red, false)
-    Colour.values should contain(UnoLogic.cpuTurn(state2).activeColour)
+    val logic2 = new UnoLogic(state2)
+    logic2.cpuTurn()
+    Colour.values should contain(logic2.state.activeColour)
   }
 
   "UnoLogic.drawCard" should "handle player and cpu drawing" in {
     val state = GameState(new Hand(Nil), new Hand(Nil), Card(Colour.Red, Number.one), Colour.Red, true)
-    UnoLogic.drawCard(state).playerHand.count should be(1)
-    UnoLogic.drawCard(state.copy(isPlayerTurn = false)).cpuHand.count should be(1)
+    
+    val logicP = new UnoLogic(state)
+    logicP.drawCard()
+    logicP.state.playerHand.count should be(1)
+
+    val logicC = new UnoLogic(state.copy(isPlayerTurn = false))
+    logicC.drawCard()
+    logicC.state.cpuHand.count should be(1)
   }
 
   "Card" should "be correctly instantiated" in {

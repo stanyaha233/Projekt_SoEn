@@ -3,97 +3,81 @@ package uno.view
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import uno.model._
+import uno.controller.UnoLogic
 
-class MainSpec extends AnyFlatSpec with Matchers {
+class UnoPlaySpec extends AnyFlatSpec with Matchers {
 
-  "parseInput" should "correctly transform string input into a GameState" in {
+  "UnoPlay.parseInput" should "correctly transform string input into a GameState update via UnoLogic" in {
     val myCard = Card(Colour.Red, Number.five)
+    val extraCard = Card(Colour.Blue, Number.one) // Verhindert sys.exit(0) im Test
     val state = GameState(
-      playerHand = new Hand(List(myCard)),
-      cpuHand = new Hand(Nil),
+      playerHand = new Hand(List(myCard, extraCard)),
+      cpuHand = new Hand(List(extraCard)),
       pile = Card(Colour.Red, Number.zero),
       activeColour = Colour.Red,
       isPlayerTurn = true
     )
+    val controller = new UnoLogic(state)
+    val tui = new UnoPlay(controller)
 
-    val nextState = parseInput("red five", state)
-    nextState.playerHand.count should be(0)
-    nextState.pile should be(myCard)
+    tui.parseInput("red five")
+    controller.state.playerHand.count should be(1)
+    controller.state.pile should be(myCard)
   }
 
   it should "return an error message for nonsense input" in {
-    val state = GameState(new Hand(Nil), new Hand(Nil), Card(Colour.Red, Number.zero), Colour.Red, true)
-    val nextState = parseInput("hallo welt", state)
-    nextState.statusMessage should include("Eingabe falsch")
+    val extraCard = Card(Colour.Blue, Number.one)
+    val state = GameState(new Hand(List(extraCard)), new Hand(List(extraCard)), Card(Colour.Red, Number.zero), Colour.Red, true)
+    val controller = new UnoLogic(state)
+    val tui = new UnoPlay(controller)
+    
+    tui.parseInput("hallo welt")
+    controller.state.statusMessage should include("Eingabe falsch")
   }
 
   it should "return an error message for incomplete input" in {
-    val state = GameState(new Hand(Nil), new Hand(Nil), Card(Colour.Red, Number.zero), Colour.Red, true)
-    val nextState = parseInput("red", state)
-    nextState.statusMessage should include("Eingabe falsch")
+    val extraCard = Card(Colour.Blue, Number.one)
+    val state = GameState(new Hand(List(extraCard)), new Hand(List(extraCard)), Card(Colour.Red, Number.zero), Colour.Red, true)
+    val controller = new UnoLogic(state)
+    val tui = new UnoPlay(controller)
+    
+    tui.parseInput("red")
+    controller.state.statusMessage should include("Eingabe falsch")
   }
 
   it should "handle cases where the player doesn't have the card" in {
+    val extraCard = Card(Colour.Blue, Number.one)
     val state = GameState(
-      playerHand = new Hand(List(Card(Colour.Blue, Number.one))),
-      cpuHand = new Hand(Nil),
+      playerHand = new Hand(List(extraCard)),
+      cpuHand = new Hand(List(extraCard)),
       pile = Card(Colour.Red, Number.zero),
       activeColour = Colour.Red,
       isPlayerTurn = true
     )
-    val nextState = parseInput("red seven", state)
-    nextState.statusMessage should be("Diese Karte hast du nicht!")
+    val controller = new UnoLogic(state)
+    val tui = new UnoPlay(controller)
+    
+    tui.parseInput("red seven")
+    controller.state.statusMessage should be("Diese Karte hast du nicht!")
   }
 
   it should "handle black cards and prompt for color" in {
     val myCard = Card(Colour.Black, Number.choice)
+    val extraCard = Card(Colour.Blue, Number.one)
     val state = GameState(
-      playerHand = new Hand(List(myCard)),
-      cpuHand = new Hand(Nil),
+      playerHand = new Hand(List(myCard, extraCard)),
+      cpuHand = new Hand(List(extraCard)),
       pile = Card(Colour.Red, Number.zero),
       activeColour = Colour.Red,
       isPlayerTurn = true
     )
+    val controller = new UnoLogic(state)
+    val tui = new UnoPlay(controller)
+    
     val in = new java.io.ByteArrayInputStream("blue\n".getBytes)
-    val nextState = Console.withIn(in) {
-      parseInput("black choice", state)
+    Console.withIn(in) {
+      tui.parseInput("black choice")
     }
-    nextState.activeColour should be(Colour.Blue)
-  }
-
-  "The game loop conditions" should "detect a win for the player" in {
-    val state = GameState(new Hand(Nil), new Hand(List(Card(Colour.Red, Number.one))), Card(Colour.Red, Number.five), Colour.Red, true)
-    gameLoop(state)
-    state.playerHand.count should be(0)
-  }
-
-  it should "detect a win for the CPU" in {
-    val state = GameState(new Hand(List(Card(Colour.Red, Number.one))), new Hand(Nil), Card(Colour.Red, Number.five), Colour.Red, false)
-    gameLoop(state)
-    state.cpuHand.count should be(0)
-  }
-
-  it should "handle draw input within game loop when not possible" in {
-    val state = GameState(
-      playerHand = new Hand(List(Card(Colour.Blue, Number.one))),
-      cpuHand = new Hand(List(Card(Colour.Red, Number.two))), 
-      pile = Card(Colour.Red, Number.zero),
-      activeColour = Colour.Red,
-      isPlayerTurn = true
-    )
-    val in = new java.io.ByteArrayInputStream("draw\n".getBytes)
-    Console.withIn(in) { gameLoop(state) }
-  }
-
-  it should "handle normal play input within game loop" in {
-    val state = GameState(
-      playerHand = new Hand(List(Card(Colour.Red, Number.five))),
-      cpuHand = new Hand(List(Card(Colour.Red, Number.two))), 
-      pile = Card(Colour.Red, Number.zero),
-      activeColour = Colour.Red,
-      isPlayerTurn = true
-    )
-    val in = new java.io.ByteArrayInputStream("red five\n".getBytes)
-    Console.withIn(in) { gameLoop(state) }
+    controller.state.activeColour should be(Colour.Blue)
   }
 }
