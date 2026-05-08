@@ -3,7 +3,7 @@ package uno.util
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class ObserverSpec extends AnyFlatSpec with Matchers {
+class Observer extends AnyFlatSpec with Matchers {
   "An Observable" should "add, remove, and notify observers" in {
     var updated = false
     val observer = new Observer {
