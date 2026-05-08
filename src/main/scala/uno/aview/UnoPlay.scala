@@ -1,4 +1,4 @@
-package uno.view
+package uno.aview
 
 import scala.io.StdIn
 import uno.model._

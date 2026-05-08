@@ -1,4 +1,4 @@
-package uno.view
+package uno.aview
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
