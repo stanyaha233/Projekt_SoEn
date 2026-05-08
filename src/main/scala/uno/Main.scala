@@ -2,7 +2,7 @@ package uno
 
 import uno.model._
 import uno.controller.UnoLogic
-import uno.view.UnoPlay
+import uno.aview.UnoPlay
 
 @main def main(): Unit =
   val firstCard = Draw.draw()
