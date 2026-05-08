@@ -48,7 +48,7 @@ class UnoLogic(var state: GameState) extends Observable {
         val newCpuHand = new Hand(state.cpuHand.cards.filterNot(_ == card))
         var newPlayerHand = state.playerHand
         var nextTurnIsPlayer = true
-        val cpuWish = state.cpuHand.cards.headOption.map(_.colour).find(_ != Colour.Black).getOrElse(Colour.Red)
+        val cpuWish = newCpuHand.cards.headOption.map(_.colour).find(_ != Colour.Black).getOrElse(Colour.Red)
         val nextColour = if (card.colour == Colour.Black) cpuWish else card.colour
         card.value match {
           case Number.plus2 => for (_ <- 1 to 2) newPlayerHand = newPlayerHand.add(Draw.draw())

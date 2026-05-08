@@ -65,6 +65,10 @@ class UnoLogicSpec extends AnyFlatSpec with Matchers {
     logicChoice.playCard(Card(Colour.Black, Number.choice), None)
     logicChoice.state.activeColour should be(Colour.Red)
 
+    val logicSameValue = new UnoLogic(baseState.copy(playerHand = new Hand(List(Card(Colour.Blue, Number.zero)))))
+    logicSameValue.playCard(Card(Colour.Blue, Number.zero))
+    logicSameValue.state.isPlayerTurn should be(false)
+
     val logicInvalid = new UnoLogic(baseState)
     logicInvalid.playCard(Card(Colour.Blue, Number.nine))
     logicInvalid.state.statusMessage should be("Ungültiger Zug!")
