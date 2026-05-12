@@ -1,7 +1,7 @@
 ## sbt project compiled with Scala 3
 
-[![CI](https://github.com/USERNAME/Projekt_SoEn/actions/workflows/scala.yml/badge.svg)](https://github.com/USERNAME/Projekt_SoEn/actions/workflows/scala.yml)
-[![Coverage Status](https://coveralls.io/repos/github/stanyaha/Projekt_SoEn/badge.svg?branch=main)](https://coveralls.io/github/USERNAME/Projekt_SoEn?branch=main)
+[![CI](https://github.com/stanyaha233/Projekt_SoEn/actions/workflows/scala.yml/badge.svg)](https://github.com/stanyaha233/Projekt_SoEn/actions/workflows/scala.yml)
+[![Coverage Status](https://coveralls.io/repos/github/stanyaha233/Projekt_SoEn/badge.svg?branch=main)](https://coveralls.io/github/stanyaha233/Projekt_SoEn?branch=main)
 
 ### Usage
 
