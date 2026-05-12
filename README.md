@@ -1,5 +1,8 @@
 ## sbt project compiled with Scala 3
 
+[![CI](https://github.com/USERNAME/Projekt_SoEn/actions/workflows/scala.yml/badge.svg)](https://github.com/USERNAME/Projekt_SoEn/actions/workflows/scala.yml)
+[![Coverage Status](https://coveralls.io/repos/github/USERNAME/Projekt_SoEn/badge.svg?branch=main)](https://coveralls.io/github/USERNAME/Projekt_SoEn?branch=main)
+
 ### Usage
 
 Hallo

@@ -32,3 +32,4 @@ tmp/
 # GitHub spezifisch
 .github/workspace/
 .DS_Store
+run
