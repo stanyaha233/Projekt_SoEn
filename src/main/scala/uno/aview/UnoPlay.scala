@@ -7,8 +7,8 @@ import uno.util.Observer
 
 class UnoPlay(controller: UnoLogic) extends Observer {
 
-  controller.add(this) // Hier meldet sich die View beim Controller an!
-
+  controller.add(this)
+  
   override def update(): Unit = {
     val state = controller.state
     println(s"\n--- ${state.statusMessage} ---")

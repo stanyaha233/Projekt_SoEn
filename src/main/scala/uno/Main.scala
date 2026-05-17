@@ -15,10 +15,9 @@ import uno.aview.UnoPlay
       else firstCard.colour,
     isPlayerTurn = true
   )
-// Initialisiert die Logik und die TUI, startet die Anzeige und die Eingabe-Schleife
   val controller = new UnoLogic(initialState)
   val tui = new UnoPlay(controller)
 
   println("=== Willkommen zu UNO ===")
-  controller.notifyObservers() // Initiale TUI Anzeige
-  tui.readInput()              // Startet die Eingabe-Schleife
+  controller.notifyObservers() 
+  tui.readInput()            
