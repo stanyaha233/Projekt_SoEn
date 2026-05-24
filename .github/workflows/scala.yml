@@ -44,9 +44,8 @@ jobs:
         run: sbt clean coverage test coverageReport coveralls
 
       - name: Run Stryker Mutation Testing
-        env:
-            STRYKER4S_SCALA_DIALECT: scala3
-        run: sbt "set strykerIsSupported := true" stryker
+        run: sbt -Dstryker4s.test-runner.source=compile "set strykerIsSupported := true" stryker
+
       - name: Upload Stryker Report
         if: always()
         uses: actions/upload-artifact@v4
