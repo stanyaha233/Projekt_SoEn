@@ -43,10 +43,8 @@ jobs:
             COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
         run: sbt clean coverage test coverageReport coveralls
 
-      - name: Run Stryker CLI Mutation Testing
-        run: |
-            npm install -g @stryker-mutator/core
-            stryker run
+      - name: Run Stryker Mutation Testing
+        run: sbt "set strykerIsSupported := true" stryker
 
       - name: Upload Stryker Report
         if: always()
