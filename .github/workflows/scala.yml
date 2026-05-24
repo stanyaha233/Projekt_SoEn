@@ -44,10 +44,7 @@ jobs:
         run: sbt clean coverage test coverageReport coveralls
 
       - name: Run Stryker Mutation Testing
-        run: |
-            echo 'stryker4s { scala-dialect = "scala3", test-runner { source = "compile" } }' > stryker4s.conf
-            sbt "set strykerIsSupported := true" stryker
-            rm stryker4s.conf
+        run: sbt "set strykerIsSupported := true" stryker
 
       - name: Upload Stryker Report
         if: always()
