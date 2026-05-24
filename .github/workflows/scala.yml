@@ -44,7 +44,10 @@ jobs:
         run: sbt clean coverage test coverageReport coveralls
 
       - name: Run Stryker Mutation Testing
-        run: sbt "set strykerIsSupported := true" stryker
+        run: |
+            curl -sL https://github.com/stryker-mutator/stryker4s/releases/download/v0.15.2/stryker4s-bundle-linux.zip -o stryker4s.zip
+            unzip -q stryker4s.zip
+            ./stryker4s-bundle/bin/stryker4s
 
       - name: Upload Stryker Report
         if: always()
