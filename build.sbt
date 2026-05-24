@@ -8,8 +8,8 @@ lazy val root = project
 
     scalaVersion := scala3Version,
 
-    libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.18",
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.18" % Test,
+    libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.17",
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.17" % Test,
 
     coverageExcludedFiles := ".*Main.*;.*Test.*;.*UnoPlay.*",
 
