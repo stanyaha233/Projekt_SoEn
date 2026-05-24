@@ -45,7 +45,10 @@ jobs:
 
       - name: Run Stryker CLI Mutation Testing
         run: |
-            cs launch io.stryker-mutator:stryker4s-commandline_2.13:0.16.1 -- stryker
+            curl -fL https://github.com/coursier/launchers/raw/master/cs-x86_64-pc-linux.gz | gzip -d > cs
+            chmod +x cs
+          
+            ./cs launch io.stryker-mutator:stryker4s-commandline_2.13:0.16.1 -- stryker
           
       - name: Upload Stryker Report
         if: always()
