@@ -40,7 +40,7 @@ jobs:
 
       - name: Run tests
         env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+            COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
         run: sbt clean coverage test coverageReport coveralls
 
       - name: Run Stryker Mutation Testing
@@ -50,5 +50,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: stryker-report
-          path: target/stryker4s-report/
+            name: stryker-report
+            path: target/stryker4s-report/
