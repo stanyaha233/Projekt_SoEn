@@ -45,7 +45,7 @@ jobs:
 
       - name: Run Stryker Mutation Testing
         run: sbt "set strykerIsSupported := true" stryker
-
+        
       - name: Upload Stryker Report
         if: always()
         uses: actions/upload-artifact@v4
