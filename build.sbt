@@ -8,9 +8,12 @@ lazy val root = project
 
     scalaVersion := scala3Version,
 
-    libraryDependencies += "org.scalameta" %% "munit" % "1.2.4" % Test,
-    libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.14",
+    libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.18",
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.18" % Test,
 
-    coverageExcludedFiles := ".*Main.*;.*Test.*;.*UnoPlay.*"
+    coverageExcludedFiles := ".*Main.*;.*Test.*;.*UnoPlay.*",
+
+    Test / parallelExecution := false,
+
+    testFrameworks += new TestFramework("org.scalatest.tools.Framework")
   )
