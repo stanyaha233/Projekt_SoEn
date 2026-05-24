@@ -21,25 +21,25 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # 2. NEU: Installiert sbt auf dem Server (Löst das "command not found" Problem!)
+      # 2. Richtet sbt auf dem Server ein
       - name: Set up sbt
         uses: sbt/setup-sbt@v1
 
-      # 3. Führt die Tests aus und erstellt den Coverage-Bericht (Aufgabe 3)
+      # 3. Führt Tests aus und generiert alle nötigen Berichte (inklusive coverageAggregate)
       - name: Run tests with coverage
-        run: sbt clean coverage test coverageReport
+        run: sbt clean coverage test coverageReport coverageAggregate
 
-      # 4. Sendet die Daten an Coveralls (Aufgabe 3)
+      # 4. Lädt die Daten zu Coveralls hoch
       - name: Upload to Coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: sbt coveralls
 
-      # 5. Führt Stryker Mutation Testing aus (Aufgabe 4)
+      # 5. Führt Stryker Mutation Testing aus
       - name: Run Stryker Mutation Testing
         run: sbt stryker
 
-      # 6. Speichert den Stryker-Bericht als herunterladbare Datei (Aufgabe 4)
+      # 6. Speichert den Stryker-Bericht als ZIP-Datei auf GitHub
       - name: Upload Stryker Report
         if: always()
         uses: actions/upload-artifact@v4
