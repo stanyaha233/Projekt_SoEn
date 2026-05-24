@@ -14,29 +14,32 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
-      # Installiert Java und sbt automatisch + kümmert sich um das Caching
+      # 1. Installiert Java (JDK 17)
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: 'sbt'
 
-      # Führt die Tests aus und erstellt den Coverage-Bericht (Aufgabe 3)
+      # 2. NEU: Installiert sbt auf dem Server (Löst das "command not found" Problem!)
+      - name: Set up sbt
+        uses: sbt/setup-sbt@v1
+
+      # 3. Führt die Tests aus und erstellt den Coverage-Bericht (Aufgabe 3)
       - name: Run tests with coverage
         run: sbt clean coverage test coverageReport
 
-      # Sendet die Daten an Coveralls mit dem automatischen GitHub-Token (Aufgabe 3)
+      # 4. Sendet die Daten an Coveralls (Aufgabe 3)
       - name: Upload to Coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: sbt coveralls
 
-      # Führt Stryker Mutation Testing aus (Aufgabe 4)
+      # 5. Führt Stryker Mutation Testing aus (Aufgabe 4)
       - name: Run Stryker Mutation Testing
         run: sbt stryker
 
-      # Speichert den Stryker-Bericht als herunterladbare Datei auf GitHub (Aufgabe 4)
+      # 6. Speichert den Stryker-Bericht als herunterladbare Datei (Aufgabe 4)
       - name: Upload Stryker Report
         if: always()
         uses: actions/upload-artifact@v4
