@@ -46,7 +46,7 @@ jobs:
       - name: Run Stryker Mutation Testing
         uses: stryker-mutator/stryker4s-action@v1
         with:
-            github-token: ${{ secrets.GITHUB_TOKEN }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Stryker Report
         if: always()
