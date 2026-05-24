@@ -14,32 +14,38 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v4
 
-      # 1. Installiert Java (JDK 17)
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # 2. Richtet sbt auf dem Server ein
-      - name: Set up sbt
-        uses: sbt/setup-sbt@v1
+      - name: Install sbt
+        run: |
+          echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | sudo tee /etc/apt/sources.list.d/sbt.list
+          curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | sudo apt-key add -
+          sudo apt-get update
+          sudo apt-get install -y sbt
 
-      # 3. Führt Tests aus und generiert die Reports direkt für dein sbt-Projekt
-      - name: Run tests with coverage
-        run: sbt clean coverage project root test coverageReport coverageAggregate
+      - name: Cache sbt dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.sbt
+            ~/.ivy2/cache
+            ~/.cache/coursier
+          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt', '**/project/build.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-sbt-
 
-      # 4. Lädt die Daten zu Coveralls hoch (Wechselt explizit in das Projekt, damit er die XML findet)
-      - name: Upload to Coveralls
+      - name: Run tests
         env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: sbt "project root" coveralls
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        run: sbt clean coverage test coverageReport coveralls
 
-      # 5. Führt Stryker Mutation Testing aus
       - name: Run Stryker Mutation Testing
-        run: sbt stryker
+        run: sbt "set strykerIsSupported := true" stryker
 
-      # 6. Speichert den Stryker-Bericht als ZIP-Datei auf GitHub
       - name: Upload Stryker Report
         if: always()
         uses: actions/upload-artifact@v4
