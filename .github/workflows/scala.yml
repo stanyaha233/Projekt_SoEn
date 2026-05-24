@@ -44,10 +44,10 @@ jobs:
         run: sbt clean coverage test coverageReport coveralls
 
       - name: Run Stryker Mutation Testing
-        run: |
-            sbt "set strykerIsSupported := true" \
-                "set stryker4s.model.TestRunnerContext.testRunnerNode := \"compile\"" \
-                stryker
+        env:
+            STRYKER4S_TEST_RUNNER_COMMAND: sbt
+            STRYKER4S_TEST_RUNNER_ARGS: test
+        run: sbt "set strykerIsSupported := true" stryker
 
       - name: Upload Stryker Report
         if: always()
