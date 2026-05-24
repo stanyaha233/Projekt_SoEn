@@ -25,15 +25,15 @@ jobs:
       - name: Set up sbt
         uses: sbt/setup-sbt@v1
 
-      # 3. Führt Tests aus und generiert alle nötigen Berichte (inklusive coverageAggregate)
+      # 3. Führt Tests aus und generiert die Reports direkt für dein sbt-Projekt
       - name: Run tests with coverage
-        run: sbt clean coverage test coverageReport coverageAggregate
+        run: sbt clean coverage project root test coverageReport coverageAggregate
 
-      # 4. Lädt die Daten zu Coveralls hoch
+      # 4. Lädt die Daten zu Coveralls hoch (Wechselt explizit in das Projekt, damit er die XML findet)
       - name: Upload to Coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: sbt coveralls
+        run: sbt "project root" coveralls
 
       # 5. Führt Stryker Mutation Testing aus
       - name: Run Stryker Mutation Testing
