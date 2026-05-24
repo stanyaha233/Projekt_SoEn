@@ -44,9 +44,7 @@ jobs:
         run: sbt clean coverage test coverageReport coveralls
 
       - name: Run Stryker Mutation Testing
-        uses: stryker-mutator/stryker4s-action@v1
-        with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+        run: sbt "set strykerIsSupported := true" stryker
 
       - name: Upload Stryker Report
         if: always()
