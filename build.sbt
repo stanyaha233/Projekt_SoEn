@@ -1,4 +1,4 @@
-val scala3Version = "3.3.1"
+val scala3Version = "3.8.2"
 
 lazy val root = project
   .in(file("."))
@@ -8,12 +8,10 @@ lazy val root = project
 
     scalaVersion := scala3Version,
 
-    libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.17",
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.17" % Test,
 
-    coverageExcludedFiles := ".*Main.*;.*Test.*;.*UnoPlay.*",
+    libraryDependencies += "org.scalameta" %% "munit" % "1.2.4" % Test,
+    libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.14",
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.18" % Test,
 
-    Test / parallelExecution := false,
-
-    testFrameworks += new TestFramework("org.scalatest.tools.Framework")
+    coverageExcludedFiles := ".*Main.*;.*Test.*;.*UnoPlay.*"
   )
