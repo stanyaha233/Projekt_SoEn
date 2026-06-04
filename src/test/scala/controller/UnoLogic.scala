@@ -81,6 +81,9 @@ class UnoLogicSpec extends AnyFlatSpec with Matchers {
     val logicInvalid = new UnoLogic(baseState)
     logicInvalid.playCard(Card(Colour.Blue, Number.nine))
     logicInvalid.state.statusMessage should be("Ungültiger Zug!")
+
+    val logicNotOwned = new UnoLogic(baseState.copy(playerHand = new Hand(List(Card(Colour.Red, Number.one)))))
+    logicNotOwned.playCard(Card(Colour.Red, Number.five))
   }
 
   "UnoLogic.cpuTurn" should "handle all CPU cases" in {
@@ -95,10 +98,12 @@ class UnoLogicSpec extends AnyFlatSpec with Matchers {
     val logicP2 = new UnoLogic(baseState.copy(cpuHand = new Hand(List(Card(Colour.Red, Number.plus2)))))
     logicP2.cpuTurn()
     logicP2.state.playerHand.count should be(2)
+    logicP2.state.isPlayerTurn should be(true)
 
     val logicP4 = new UnoLogic(baseState.copy(cpuHand = new Hand(List(Card(Colour.Black, Number.plus4)))))
     logicP4.cpuTurn()
     logicP4.state.playerHand.count should be(4)
+    logicP4.state.isPlayerTurn should be(true)
 
     val logicSkip = new UnoLogic(baseState.copy(cpuHand = new Hand(List(Card(Colour.Red, Number.skip)))))
     logicSkip.cpuTurn()
@@ -111,6 +116,12 @@ class UnoLogicSpec extends AnyFlatSpec with Matchers {
     val logicDraw = new UnoLogic(baseState.copy(cpuHand = new Hand(List(Card(Colour.Blue, Number.nine)))))
     logicDraw.cpuTurn()
     logicDraw.state.cpuHand.count should be(2)
+    logicDraw.state.isPlayerTurn should be(true)
+
+    val logicEmpty = new UnoLogic(baseState.copy(cpuHand = new Hand(Nil)))
+    logicEmpty.cpuTurn()
+    logicEmpty.state.cpuHand.count should be(1)
+    logicEmpty.state.isPlayerTurn should be(true)
 
     val cpuWishState = GameState(new Hand(Nil), new Hand(List(Card(Colour.Green, Number.one), Card(Colour.Black, Number.choice))), Card(Colour.Red, Number.zero), Colour.Red, false)
     val logicWish = new UnoLogic(cpuWishState)
@@ -125,11 +136,13 @@ class UnoLogicSpec extends AnyFlatSpec with Matchers {
     val logic1 = new UnoLogic(state1)
     logic1.cpuTurn()
     Colour.values should contain(logic1.state.activeColour)
+    logic1.state.isPlayerTurn should be(true)
 
     val state2 = GameState(new Hand(Nil), new Hand(List(black, Card(Colour.Green, Number.one))), Card(Colour.Red, Number.zero), Colour.Red, false)
     val logic2 = new UnoLogic(state2)
     logic2.cpuTurn()
     Colour.values should contain(logic2.state.activeColour)
+    logic2.state.isPlayerTurn should be(true)
   }
 
   "UnoLogic.drawCard" should "handle player and cpu drawing" in {

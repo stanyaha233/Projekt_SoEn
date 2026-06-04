@@ -69,5 +69,27 @@ class KarteSpec extends AnyFlatSpec with Matchers {
     val state = GameState(new Hand(Nil), new Hand(Nil), Card(Colour.Red, Number.zero), Colour.Red, true)
     state.statusMessage should be("Spiel startet!")
     state.unoSaid should be(false)
+
+    val state2 = state.copy(isPlayerTurn = false)
+    state.toString
+    state.hashCode()
+    state.equals(state2) should be(false)
+    state.equals(state) should be(true)
+    GameState.unapply(state)
+  }
+
+  "Case Classes and Enums" should "have their generated methods covered" in {
+    val card1 = Card(Colour.Red, Number.zero)
+    val card2 = card1.copy(value = Number.one)
+    card1.toString
+    card1.hashCode()
+    card1.equals(card2) should be(false)
+    card1.equals(card1) should be(true)
+    Card.unapply(card1)
+
+    Colour.values
+    Number.values
+    Colour.withName("Red") should be(Colour.Red)
+    Number.withName("zero") should be(Number.zero)
   }
 }
