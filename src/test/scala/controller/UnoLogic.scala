@@ -43,27 +43,36 @@ class UnoLogicSpec extends AnyFlatSpec with Matchers {
     val logicNormal = new UnoLogic(baseState.copy(playerHand = new Hand(List(Card(Colour.Red, Number.five)))))
     logicNormal.playCard(Card(Colour.Red, Number.five))
     logicNormal.state.isPlayerTurn should be(false)
+    logicNormal.state.statusMessage should be("Du legst Red five")
+    logicNormal.state.activeColour should be(Colour.Red)
 
     val logicP2 = new UnoLogic(baseState.copy(playerHand = new Hand(List(Card(Colour.Red, Number.plus2)))))
     logicP2.playCard(Card(Colour.Red, Number.plus2))
     logicP2.state.cpuHand.count should be(2)
+    logicP2.state.isPlayerTurn should be(false)
+    logicP2.state.statusMessage should be("Du legst Red plus2. CPU zieht 2!")
 
     val logicP4 = new UnoLogic(baseState.copy(playerHand = new Hand(List(Card(Colour.Black, Number.plus4)))))
     logicP4.playCard(Card(Colour.Black, Number.plus4), Some(Colour.Blue))
     logicP4.state.cpuHand.count should be(4)
     logicP4.state.activeColour should be(Colour.Blue)
+    logicP4.state.isPlayerTurn should be(false)
+    logicP4.state.statusMessage should be("Du legst Black plus4. CPU zieht 4!")
 
     val logicSkip = new UnoLogic(baseState.copy(playerHand = new Hand(List(Card(Colour.Red, Number.skip)))))
     logicSkip.playCard(Card(Colour.Red, Number.skip))
     logicSkip.state.isPlayerTurn should be(true)
+    logicSkip.state.statusMessage should be("Du legst Red skip. Du bist nochmal dran!")
 
     val logicDir = new UnoLogic(baseState.copy(playerHand = new Hand(List(Card(Colour.Red, Number.directionchange)))))
     logicDir.playCard(Card(Colour.Red, Number.directionchange))
     logicDir.state.isPlayerTurn should be(true)
+    logicDir.state.statusMessage should be("Du legst Red directionchange. Du bist nochmal dran!")
 
     val logicChoice = new UnoLogic(baseState.copy(playerHand = new Hand(List(Card(Colour.Black, Number.choice)))))
     logicChoice.playCard(Card(Colour.Black, Number.choice), None)
     logicChoice.state.activeColour should be(Colour.Red)
+    logicChoice.state.statusMessage should be("Du legst Black choice")
 
     val logicSameValue = new UnoLogic(baseState.copy(playerHand = new Hand(List(Card(Colour.Blue, Number.zero)))))
     logicSameValue.playCard(Card(Colour.Blue, Number.zero))
@@ -80,6 +89,8 @@ class UnoLogicSpec extends AnyFlatSpec with Matchers {
     val logicNormal = new UnoLogic(baseState.copy(cpuHand = new Hand(List(Card(Colour.Red, Number.five)))))
     logicNormal.cpuTurn()
     logicNormal.state.pile.value should be(Number.five)
+    logicNormal.state.isPlayerTurn should be(true)
+    logicNormal.state.statusMessage should be("Gegner legt Red five")
 
     val logicP2 = new UnoLogic(baseState.copy(cpuHand = new Hand(List(Card(Colour.Red, Number.plus2)))))
     logicP2.cpuTurn()
@@ -105,6 +116,7 @@ class UnoLogicSpec extends AnyFlatSpec with Matchers {
     val logicWish = new UnoLogic(cpuWishState)
     logicWish.cpuTurn()
     logicWish.state.activeColour should be(Colour.Green)
+    logicWish.state.isPlayerTurn should be(true)
   }
 
   it should "handle cpuWish logic branches" in {
@@ -126,10 +138,14 @@ class UnoLogicSpec extends AnyFlatSpec with Matchers {
     val logicP = new UnoLogic(state)
     logicP.drawCard()
     logicP.state.playerHand.count should be(1)
+    logicP.state.isPlayerTurn should be(false)
+    logicP.state.statusMessage should be("Gezogen.")
 
     val logicC = new UnoLogic(state.copy(isPlayerTurn = false))
     logicC.drawCard()
     logicC.state.cpuHand.count should be(1)
+    logicC.state.isPlayerTurn should be(true)
+    logicC.state.statusMessage should be("CPU zieht.")
   }
 
   "Card" should "be correctly instantiated" in {
