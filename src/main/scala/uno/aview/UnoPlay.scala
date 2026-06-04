@@ -17,11 +17,11 @@ class UnoPlay(controller: UnoLogic) extends Observer {
 
     if (state.playerHand.count == 0) {
       println("GLÜCKWUNSCH! Du hast gewonnen!")
-      sys.exit(0)
+      return
     }
     if (state.cpuHand.count == 0) {
       println("SCHADE! Der Gegner hat gewonnen!")
-      sys.exit(0)
+      return
     }
 
     if (state.isPlayerTurn) {
@@ -38,7 +38,7 @@ class UnoPlay(controller: UnoLogic) extends Observer {
   }
 
   def readInput(): Unit = {
-    while (true) {
+    while (controller.state.playerHand.count > 0 && controller.state.cpuHand.count > 0) {
       if (controller.state.isPlayerTurn) {
         val input = StdIn.readLine("Zug (Farbe Wert) oder 'draw': ").trim.toLowerCase
         if (input == "draw") {
