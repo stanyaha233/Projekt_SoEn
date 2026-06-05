@@ -80,4 +80,44 @@ class UnoPlaySpec extends AnyFlatSpec with Matchers {
     }
     controller.state.activeColour should be(Colour.Blue)
   }
+
+  "UnoPlay.readInput" should "process valid input and trigger player win" in {
+    val myCard = Card(Colour.Red, Number.five)
+    val state = GameState(
+      playerHand = new Hand(List(myCard)),
+      cpuHand = new Hand(List(Card(Colour.Blue, Number.one))),
+      pile = Card(Colour.Red, Number.zero),
+      activeColour = Colour.Red,
+      isPlayerTurn = true
+    )
+    val controller = new UnoLogic(state)
+    val tui = new UnoPlay(controller)
+    
+    val in = new java.io.ByteArrayInputStream("red five\n".getBytes)
+    Console.withIn(in) {
+      tui.readInput()
+    }
+    controller.state.playerHand.count should be(0)
+  }
+
+  it should "handle reading 'draw', trigger cpuTurn and let cpu win" in {
+    val state = GameState(
+      playerHand = new Hand(List(Card(Colour.Green, Number.five))),
+      cpuHand = new Hand(List(Card(Colour.Red, Number.one))),
+      pile = Card(Colour.Red, Number.zero),
+      activeColour = Colour.Red,
+      isPlayerTurn = true
+    )
+    val controller = new UnoLogic(state)
+    val tui = new UnoPlay(controller)
+    
+    // Manuelles Update, um die Ausgabe "Du kannst nicht legen..." auszulösen
+    controller.notifyObservers()
+
+    val in = new java.io.ByteArrayInputStream("draw\n".getBytes)
+    Console.withIn(in) {
+      tui.readInput()
+    }
+    controller.state.cpuHand.count should be(0)
+  }
 }
