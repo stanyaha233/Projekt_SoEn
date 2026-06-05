@@ -2,34 +2,34 @@ package uno.controller
 
 import uno.model._
 import uno.util.Observable
+import uno.util.UndoManager
+import uno.util.Command
 
 class UnoLogic(var state: GameState) extends Observable {
+  private val undoManager = new UndoManager()
+
   def canPlay(card: Card): Boolean = {
     card.colour == state.activeColour ||
-    card.value == state.pile.value ||
-    card.colour == Colour.Black
+      card.value == state.pile.value ||
+      card.colour == Colour.Black
   }
 
-  def playCard(card: Card, chosenColour: Option[Colour.Value] = None): Unit = {
+  def executePlaceCard(card: Card, chosenColour: Option[Colour.Value] = None): Unit = {
     if (!canPlay(card)) {
       state = state.copy(statusMessage = "Ungültiger Zug!")
     } else {
       val newPlayerHand = new Hand(state.playerHand.cards.diff(List(card)))
       val nextColour = if (card.colour == Colour.Black) chosenColour.getOrElse(Colour.Red) else card.colour
-      
+
       val (newCpuHand, nextTurnIsPlayer, msgSuffix) = card.value match {
-        case Number.plus2 =>
-          (state.cpuHand.add(Draw.draw()).add(Draw.draw()), false, ". CPU zieht 2!")
-        case Number.plus4 =>
-          (state.cpuHand.add(Draw.draw()).add(Draw.draw()).add(Draw.draw()).add(Draw.draw()), false, ". CPU zieht 4!")
-        case Number.skip | Number.directionchange =>
-          (state.cpuHand, true, ". Du bist nochmal dran!")
-        case _ =>
-          (state.cpuHand, false, "")
+        case Number.plus2 => (state.cpuHand.add(Draw.draw()).add(Draw.draw()), false, ". CPU zieht 2!")
+        case Number.plus4 => (state.cpuHand.add(Draw.draw()).add(Draw.draw()).add(Draw.draw()).add(Draw.draw()), false, ". CPU zieht 4!")
+        case Number.skip | Number.directionchange => (state.cpuHand, true, ". Du bist nochmal dran!")
+        case _ => (state.cpuHand, false, "")
       }
-      
+
       val msg = s"Du legst ${card.colour} ${card.value}$msgSuffix"
-  
+
       state = state.copy(
         playerHand = newPlayerHand,
         cpuHand = newCpuHand,
@@ -39,6 +39,15 @@ class UnoLogic(var state: GameState) extends Observable {
         statusMessage = msg
       )
     }
+    notifyObservers()
+  }
+
+  def playCard(card: Card, chosenColour: Option[Colour.Value] = None): Unit = {
+    undoManager.executeCommand(new PlaceCardCommand(this, card, chosenColour))
+  }
+
+  def undo(): Unit = {
+    undoManager.undo()
     notifyObservers()
   }
 
