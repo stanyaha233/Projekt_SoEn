@@ -166,4 +166,10 @@ class UnoLogicSpec extends AnyFlatSpec with Matchers {
     card.colour should be(Colour.Yellow)
     card.value should be(Number.skip)
   }
+  "UnoLogic.executePlaceCard" should "abdecken den Default-Zweig (Standardkarte)" in {
+    val baseState = GameState(new Hand(List(Card(Colour.Red, Number.five))), Hand(Nil), Card(Colour.Red, Number.zero), Colour.Red, true)
+    val logic = new UnoLogic(baseState)
+    logic.executePlaceCard(Card(Colour.Red, Number.five))
+    logic.state.playerHand.count should be(0) // Karte sollte weg sein
+  }
 }

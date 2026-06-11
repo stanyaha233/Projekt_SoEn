@@ -8,13 +8,11 @@ import uno.model._
 import java.awt.Color
 
 class SwingGui(controller: UnoLogic) extends Frame with Observer {
-
   controller.add(this)
 
   title = "Uno GUI"
   minimumSize = new Dimension(700, 450)
 
-  // GUI-Elemente ...
   val cpuLabel = new Label("Gegner hat: " + controller.state.cpuHand.count + " Karten")
   val statusLabel = new Label("Willkommen bei Uno!")
   val pileLabel = new Label("Stapel: " + controller.state.pile)
@@ -46,16 +44,35 @@ class SwingGui(controller: UnoLogic) extends Frame with Observer {
     add(new ScrollPane(handPanel), BorderPanel.Position.South)
   }
 
-  def askForColour(): Colour.Value = {
+  var selectionSource: () => Option[String] = () => {
     val options = List("Red", "Blue", "Green", "Yellow")
-    val selection = Dialog.showInput(this, "Wähle eine Farbe:", "Wunschkarte",
+    Dialog.showInput(this, "Wähle eine Farbe:", "Wunschkarte",
       Dialog.Message.Question, null, options, "Red")
-    selection match {
-      case Some("Red")    => Colour.Red
-      case Some("Blue")   => Colour.Blue
-      case Some("Green")  => Colour.Green
-      case Some("Yellow") => Colour.Yellow
-      case _              => Colour.Red
+  }
+
+  def askForColour(): Colour.Value = {
+    val selection = selectionSource()
+    mapSelectionToColour(selection)
+  }
+
+  def mapSelectionToColour(selection: Option[String]): Colour.Value = selection match {
+    case Some("Red")    => Colour.Red
+    case Some("Blue")   => Colour.Blue
+    case Some("Green")  => Colour.Green
+    case Some("Yellow") => Colour.Yellow
+    case _              => Colour.Red
+  }
+
+  def handleGameOver(msg: String): Unit = {
+    Dialog.showMessage(this, msg, "Spiel vorbei")
+    this.dispose()
+  }
+
+  def handleCardClick(card: Card): Unit = {
+    if (card.colour == Colour.Black) {
+      controller.playCard(card, Some(askForColour()))
+    } else {
+      controller.playCard(card)
     }
   }
 
@@ -68,11 +85,9 @@ class SwingGui(controller: UnoLogic) extends Frame with Observer {
   }
 
   override def update(): Unit = {
-    // Sieg-Prüfung
     if (controller.state.playerHand.cards.isEmpty || controller.state.cpuHand.cards.isEmpty) {
       val msg = if (controller.state.playerHand.cards.isEmpty) "Du hast gewonnen!" else "Der Gegner hat gewonnen!"
-      Dialog.showMessage(this, msg, "Spiel vorbei")
-      sys.exit(0)
+      handleGameOver(msg)
     }
 
     statusLabel.text = controller.state.statusMessage
@@ -92,10 +107,9 @@ class SwingGui(controller: UnoLogic) extends Frame with Observer {
         foreground = Color.WHITE
         opaque = true
         borderPainted = true
+
         reactions += {
-          case ButtonClicked(_) =>
-            if (card.colour == Colour.Black) controller.playCard(card, Some(askForColour()))
-            else controller.playCard(card)
+          case ButtonClicked(_) => handleCardClick(card)
         }
       }
       handPanel.contents += button
