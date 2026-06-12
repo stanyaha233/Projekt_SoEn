@@ -8,45 +8,26 @@ import uno.util.Observer
 class UnoPlay(controller: UnoLogic) extends Observer {
 
   controller.add(this)
-  
+
   override def update(): Unit = {
     val state = controller.state
-    println(s"\n--- ${state.statusMessage} ---")
-    println(s"Aktuelle Farbe: ${state.activeColour} | Karte auf Stapel: ${state.pile.colour} ${state.pile.value}")
-    println(s"Gegner Karten: ${state.cpuHand.count}")
 
-    if (state.playerHand.count == 0) {
-      println("GLÜCKWUNSCH! Du hast gewonnen!")
-      return
-    }
-    if (state.cpuHand.count == 0) {
-      println("SCHADE! Der Gegner hat gewonnen!")
-      return
-    }
+    if (state.playerHand.count > 0 && state.cpuHand.count > 0) {
+      println(s"\n--- ${state.statusMessage} ---")
+      println(s"Aktuelle Farbe: ${state.activeColour} | Karte auf Stapel: ${state.pile.colour} ${state.pile.value}")
+      println(s"Gegner Karten: ${state.cpuHand.count}")
 
-    if (state.isPlayerTurn) {
-      val coloredHand = state.playerHand.cards.map(c => formatCard(c)).mkString(" ")
-      println(s"Deine Hand: $coloredHand")
+      if (state.isPlayerTurn) {
+        val coloredHand = state.playerHand.cards.map(c => formatCard(c)).mkString(" ")
+        println(s"Deine Hand: $coloredHand")
 
-      if (!state.playerHand.possible(state.pile)) {
-        println("Du kannst nicht legen. Tippe 'draw' zum Ziehen.")
-      }
-    } else {
-      Thread.sleep(1500)
-      controller.cpuTurn()
-    }
-  }
-
-  def readInput(): Unit = {
-    while (controller.state.playerHand.count > 0 && controller.state.cpuHand.count > 0) {
-      if (controller.state.isPlayerTurn) {
-        val input = StdIn.readLine("Zug (Farbe Wert) oder 'draw': ").trim.toLowerCase
-        if (input == "draw") {
-          controller.drawCard()
-        } else {
-          parseInput(input)
+        if (!state.playerHand.possible(state.pile)) {
+          println("Du kannst nicht legen. Tippe 'draw' zum Ziehen.")
         }
       }
+    } else {
+      if (state.playerHand.count == 0) println("GLÜCKWUNSCH! Du hast gewonnen!")
+      else if (state.cpuHand.count == 0) println("SCHADE! Der Gegner hat gewonnen!")
     }
   }
 
@@ -75,6 +56,26 @@ class UnoPlay(controller: UnoLogic) extends Observer {
       case _: IllegalArgumentException | _: NoSuchElementException => 
         controller.state = controller.state.copy(statusMessage = "Eingabe falsch!")
         controller.notifyObservers()
+    }
+  }
+
+  def readInput(): Unit = {
+    while (controller.state.playerHand.count > 0 && controller.state.cpuHand.count > 0) {
+      if (controller.state.isPlayerTurn) {
+        val input = StdIn.readLine("Zug (Farbe Wert) oder 'draw': ").trim.toLowerCase
+
+        input match {
+          case "undo" =>
+            controller.undo()
+          case "draw" =>
+            controller.drawCard()
+          case _ =>
+            parseInput(input)
+        }
+      } else {
+        Thread.sleep(1000)
+        controller.cpuTurn()
+      }
     }
   }
 }
