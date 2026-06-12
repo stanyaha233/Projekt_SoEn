@@ -3,37 +3,30 @@ import scala.util.Random
 
 object DeckFactory {
   def createStandardDeck(): List[Card] = {
-    var deck = List[Card]()
-    val normalColours = Colour.values.filterNot(_ == Colour.Black)
-    val normalNumbers = Number.values.filterNot(n => n == Number.plus4 || n == Number.choice)
+    val normalColours = Colour.values.filterNot(_ == Colour.Black).toList
+    val nonZeroNumbers = Number.values.filterNot(n => n == Number.plus4 || n == Number.choice || n == Number.zero).toList
 
-    // Alle normalen Karten (Farben + Zahlen/Aktionskarten) zum Deck hinzufügen
-    for {
+    val zeroCards = normalColours.map(c => Card(c, Number.zero))
+
+    val normalCards = for {
       c <- normalColours
-      n <- normalNumbers
-      _ <- 1 to 2 // In Uno gibt es fast jede Karte doppelt
-    } deck = Card(c, n) :: deck
+      n <- nonZeroNumbers
+      _ <- 1 to 2
+    } yield Card(c, n)
 
-    // Die schwarzen Aktionskarten (je 4 Stück)
-    for (_ <- 1 to 4) {
-      deck = Card(Colour.Black, Number.choice) :: deck
-      deck = Card(Colour.Black, Number.plus4) :: deck
-    }
+    val blackCards = List.fill(4)(List(Card(Colour.Black, Number.choice), Card(Colour.Black, Number.plus4))).flatten
 
-    Random.shuffle(deck) // Komplettes Deck mischen
+    Random.shuffle(zeroCards ++ normalCards ++ blackCards)
   }
 }
 
 object Draw {
-  // Der aktuelle Nachziehstapel, der von der Factory bereitgestellt wird
   var drawPile: List[Card] = DeckFactory.createStandardDeck()
 
   def draw(): Card = {
-    // Wenn der Stapel leer ist, erstellt die Fabrik einfach einen neuen gemischten Stapel
     if (drawPile.isEmpty) {
       drawPile = DeckFactory.createStandardDeck()
     }
-    // Oberste Karte vom Stapel nehmen und aus der Liste entfernen
     val card = drawPile.head
     drawPile = drawPile.tail
     card
