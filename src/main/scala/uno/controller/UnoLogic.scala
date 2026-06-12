@@ -34,23 +34,24 @@ class UnoLogic(var state: GameState) extends Observable {
         case _ => (state.cpuHand, false, "")
       }
     }
+  }
 
     
-    def playCard(card: Card, chosenColour: Option[Colour.Value] = None): Unit = {
+  def playCard(card: Card, chosenColour: Option[Colour.Value] = None): Unit = {
       if (canPlay(card)) {
         undoManager.executeCommand(new PlaceCardCommand(this, card, chosenColour))
       } else {
         state = state.copy(statusMessage = "Ungültiger Zug!")
         notifyObservers()
       }
-    }
+  }
 
-    def undo(): Unit = {
+  def undo(): Unit = {
         undoManager.undo()
         notifyObservers()
-    }
+  }
 
-    def cpuTurn(): Unit = {
+  def cpuTurn(): Unit = {
         state.cpuHand.cards.find(c => canPlay(c)) match {
           case Some(card) =>
             val newCpuHand = new Hand(state.cpuHand.cards.filterNot(_ == card))
@@ -78,7 +79,7 @@ class UnoLogic(var state: GameState) extends Observable {
         }
       }
 
-      def drawCard(): Unit = {
+  def drawCard(): Unit = {
         val drawResult: Try[Card] = Try(Draw.draw())
 
         drawResult match {
@@ -93,21 +94,19 @@ class UnoLogic(var state: GameState) extends Observable {
             state = state.copy(statusMessage = "Stapel ist leer!")
         }
         notifyObservers()
-      }
+  }
 
-      def sortHandByColor(): Unit = {
+  def sortHandByColor(): Unit = {
         val sortedCards = new SortByColorStrategy().sort(state.playerHand.cards)
         val sortedHand = new Hand(sortedCards)
         state = state.copy(playerHand = sortedHand, statusMessage = "Karten wurden nach Farbe sortiert.")
         notifyObservers()
-      }
+  }
 
-      def sortHandByValue(): Unit = {
+  def sortHandByValue(): Unit = {
         val sortedCards = new SortByValueStrategy().sort(state.playerHand.cards)
         val sortedHand = new Hand(sortedCards)
         state = state.copy(playerHand = sortedHand, statusMessage = "Karten wurden nach Zahl sortiert.")
         notifyObservers()
       }
-    }
   }
-}
