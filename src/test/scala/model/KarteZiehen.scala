@@ -1,56 +1,43 @@
 package uno.model
 
-
-import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 
-class KarteZiehenSpec extends AnyFlatSpec with Matchers {
+class KarteZiehenSpec extends AnyWordSpec with Matchers {
 
-  "ziehen" should "generate a valid card with non-null properties" in {
-    val card = Draw.draw()
-
-    card.colour shouldNot be(null)
-    card.value shouldNot be(null)
-  }
-
-  it should "only assign 'plus4' or 'wahl' to black cards" in {
-    val draws = (1 to 100).map(_ => Draw.draw())
-    val blackCards = draws.filter(_.colour == Colour.Black)
-
-    blackCards.foreach { card =>
-      card.value should (be(Number.plus4) or be(Number.choice))
+  "DeckFactory" should {
+    "create a standard deck of 108 cards" in {
+      val deck = DeckFactory.createStandardDeck()
+      deck.length shouldBe 108
+      deck.count(_.colour == Colour.Black) shouldBe 8 // 4x choice, 4x plus4
     }
   }
 
-  it should "never assign 'plus4' or 'wahl' to colored cards" in {
-    val draws = (1 to 100).map(_ => Draw.draw())
-    val coloredCards = draws.filter(_.colour != Colour.Black)
-
-    coloredCards.foreach { card =>
-      card.value shouldNot be(Number.plus4)
-      card.value shouldNot be(Number.choice)
+  "Draw" should {
+    "replenish pile if empty" in {
+      Draw.drawPile = List.empty
+      val card = Draw.draw()
+      Draw.drawPile.length shouldBe 107 // 108 neu generiert - 1 gezogene Karte
     }
-  }
 
-  "beginningHand" should "fill an empty hand to exactly 7 cards" in {
-    val emptyHand = Hand(List.empty)
-    val resultHand = Draw.beginningHand(emptyHand)
+    "create a beginning hand of 7 cards" in {
+      Draw.drawPile = DeckFactory.createStandardDeck()
+      val hand = Draw.beginningHand(new Hand(List.empty))
+      hand.count shouldBe 7
+    }
 
-    resultHand.count should be(7)
-  }
+    "supplement a partial hand to reach 7 cards" in {
+      Draw.drawPile = DeckFactory.createStandardDeck()
+      val initialHand = Hand(List(Card(Colour.Red, Number.one), Card(Colour.Blue, Number.two)))
+      val resultHand = Draw.beginningHand(initialHand)
+      resultHand.count shouldBe 7
+    }
 
-  it should "correctly supplement a partial hand to reach 7 cards" in {
-    val initialHand = Hand(List(Card(Colour.Red, Number.one), Card(Colour.Blue, Number.two)))
-    initialHand.count should be(2)
-
-    val resultHand = Draw.beginningHand(initialHand)
-    resultHand.count should be(7)
-  }
-
-  it should "not add any cards if the hand already has 7 or more cards" in {
-    val fullHand = Hand((1 to 7).map(_ => Draw.draw()).toList)
-    val resultHand = Draw.beginningHand(fullHand)
-
-    resultHand.count should be(7)
+    "not add any cards if the hand already has 7 or more cards" in {
+      Draw.drawPile = DeckFactory.createStandardDeck()
+      val fullHand = Hand((1 to 8).map(_ => Card(Colour.Red, Number.one)).toList)
+      val resultHand = Draw.beginningHand(fullHand)
+      resultHand.count shouldBe 8
+    }
   }
 }

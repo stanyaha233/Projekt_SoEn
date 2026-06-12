@@ -172,4 +172,57 @@ class UnoLogicSpec extends AnyFlatSpec with Matchers {
     logic.executePlaceCard(Card(Colour.Red, Number.five))
     logic.state.playerHand.count should be(0) // Karte sollte weg sein
   }
+
+  "UnoLogic" should "sort hands via sort functions and update status" in {
+    val state = GameState(new Hand(List(Card(Colour.Blue, Number.two), Card(Colour.Red, Number.one))), new Hand(Nil), Card(Colour.Red, Number.one), Colour.Red, true)
+    val logic = new UnoLogic(state)
+
+    logic.sortHandByColor()
+    logic.state.statusMessage should be("Karten wurden nach Farbe sortiert.")
+
+    logic.sortHandByValue()
+    logic.state.statusMessage should be("Karten wurden nach Zahl sortiert.")
+  }
+
+  it should "handle undo" in {
+    val state = GameState(new Hand(Nil), new Hand(Nil), Card(Colour.Blue, Number.two), Colour.Blue, true)
+    val logic = new UnoLogic(state)
+    logic.undo()
+    // Undo on empty stack should just notify observers but not crash
+    logic.state should be(state)
+  }
+
+  it should "handle drawCard failure when pile throws exception safely" in {
+    val state = GameState(new Hand(Nil), new Hand(Nil), Card(Colour.Blue, Number.two), Colour.Blue, true)
+    val logic = new UnoLogic(state)
+    val backupPile = Draw.drawPile
+    
+    try {
+      Draw.drawPile = null // Provoziere absichtlich einen Fehler (NPE) für den Failure-Zweig
+      logic.drawCard()
+      logic.state.statusMessage should be("Stapel ist leer!")
+    } finally {
+      Draw.drawPile = DeckFactory.createStandardDeck() // Stapel immer sicher mit frischen Karten wiederherstellen!
+    }
+  }
+
+  "Hand.sortCards" should "sort cards using given strategies directly on the hand" in {
+    val hand = new Hand(List(Card(Colour.Blue, Number.two), Card(Colour.Red, Number.one)))
+    val sortedHand = hand.sortCards(new SortByColorStrategy())
+    sortedHand.cards should be(List(Card(Colour.Red, Number.one), Card(Colour.Blue, Number.two)))
+  }
+
+  "BotStrategies" should "correctly choose cards based on their logic" in {
+    val firstStrategy = new FirstPossibleStrategy()
+    val blackStrategy = new BlackFirstStrategy()
+    val hand1 = new Hand(List(Card(Colour.Green, Number.nine), Card(Colour.Blue, Number.two)))
+    val handWithBlack = new Hand(List(Card(Colour.Blue, Number.two), Card(Colour.Black, Number.choice)))
+
+    firstStrategy.chooseCard(hand1, Colour.Blue, Number.one) should be(Some(Card(Colour.Blue, Number.two)))
+    firstStrategy.chooseCard(hand1, Colour.Red, Number.five) should be(None)
+
+    blackStrategy.chooseCard(handWithBlack, Colour.Blue, Number.one) should be(Some(Card(Colour.Black, Number.choice)))
+    blackStrategy.chooseCard(hand1, Colour.Blue, Number.one) should be(Some(Card(Colour.Blue, Number.two)))
+    blackStrategy.chooseCard(hand1, Colour.Red, Number.five) should be(None)
+  }
 }

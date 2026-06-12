@@ -1,4 +1,4 @@
-val scala3Version = "3.8.2"
+val scala3Version = "3.3.3"
 
 lazy val root = project
   .in(file("."))
@@ -14,6 +14,7 @@ lazy val root = project
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.18" % Test,
     libraryDependencies += "org.scala-lang.modules" %% "scala-swing" % "3.0.0",
 
-    coverageExcludedFiles := ".*Main\\.scala;.*UnoPlay\\.scala",
-    coverageExcludedPackages := ".*aview.*;.*main.*;.*Main.*"
+    coverageExcludedFiles := ".*Main.*;.*UnoPlay.*;.*SwingGui.*",
+    coverageExcludedPackages := "uno\\.gui\\..*;uno\\.aview\\..*",
+    Test / parallelExecution := false
   )

@@ -33,6 +33,15 @@ class UnoLogic(var state: GameState) extends Observable {
         case Number.skip | Number.directionchange => (state.cpuHand, true, ". Du bist nochmal dran!")
         case _ => (state.cpuHand, false, "")
       }
+
+      state = state.copy(
+        playerHand = autoSort(newPlayerHand),
+        cpuHand = newCpuHand,
+        pile = card,
+        activeColour = nextColour,
+        isPlayerTurn = nextTurnIsPlayer,
+        statusMessage = s"Du legst ${card.colour} ${card.value}" + msgSuffix
+      )
     }
   }
 
@@ -85,9 +94,9 @@ class UnoLogic(var state: GameState) extends Observable {
         drawResult match {
           case Success(newCard) =>
             val nextState = if (state.isPlayerTurn) {
-              state.copy(playerHand = state.playerHand.add(newCard), isPlayerTurn = false)
+              state.copy(playerHand = autoSort(state.playerHand.add(newCard)), isPlayerTurn = false, statusMessage = "Gezogen.")
             } else {
-              state.copy(cpuHand = state.cpuHand.add(newCard), isPlayerTurn = true)
+              state.copy(cpuHand = state.cpuHand.add(newCard), isPlayerTurn = true, statusMessage = "CPU zieht.")
             }
             state = nextState
           case Failure(e) =>
@@ -110,3 +119,4 @@ class UnoLogic(var state: GameState) extends Observable {
         notifyObservers()
       }
   }
+  
