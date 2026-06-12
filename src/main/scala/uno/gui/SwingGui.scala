@@ -14,25 +14,18 @@ class CardPanel(color: Color, valueText: String) extends Component {
   maximumSize = new Dimension(cardWidth, cardHeight)
 
   override def paintComponent(g: Graphics2D): Unit = {
-    // Hintergrund
     g.setColor(color)
     g.fillRoundRect(0, 0, cardWidth, cardHeight, 20, 20)
-
-    // Rahmen
     g.setColor(Color.WHITE)
     g.setStroke(new java.awt.BasicStroke(3))
     g.drawRoundRect(0, 0, cardWidth - 1, cardHeight - 1, 20, 20)
-
-    // Text zentrieren
     g.setColor(Color.WHITE)
     val font = new java.awt.Font("Arial", java.awt.Font.BOLD, 12)
     g.setFont(font)
-
     val metrics = g.getFontMetrics(font)
     val textWidth = metrics.stringWidth(valueText)
     val x = (cardWidth - textWidth) / 2
     val y = (cardHeight - metrics.getHeight) / 2 + metrics.getAscent
-
     g.drawString(valueText, x, y)
   }
 }
@@ -58,7 +51,6 @@ class SwingGui(controller: UnoLogic) extends Frame with Observer {
   }
 
   val handPanel = new GridPanel(0, 4) { vGap = 5; hGap = 5 }
-
   val centerPanel = new BoxPanel(Orientation.Vertical)
 
   contents = new BorderPanel {
@@ -71,69 +63,35 @@ class SwingGui(controller: UnoLogic) extends Frame with Observer {
     add(new ScrollPane(handPanel), BorderPanel.Position.South)
   }
 
-  updateCenterPanel()
+  private def getCardValueSymbol(value: Number.Value): String = value.toString match {
+    case "zero"  => "0"; case "one"   => "1"; case "two"   => "2"
+    case "three" => "3"; case "four"  => "4"; case "five"  => "5"
+    case "six"   => "6"; case "seven" => "7"; case "eight" => "8"
+    case "nine"  => "9"; case _ => value.toString
+  }
 
   def updateCenterPanel(): Unit = {
     centerPanel.contents.clear()
-
     val mainBox = new BoxPanel(Orientation.Vertical) {
+      contents += Swing.VGlue
       contents += new BorderPanel {
         preferredSize = new Dimension(100, 150)
         maximumSize = new Dimension(100, 150)
         add(pilePanel, BorderPanel.Position.Center)
         xLayoutAlignment = java.awt.Component.CENTER_ALIGNMENT
       }
-
       colourLabel.xLayoutAlignment = java.awt.Component.CENTER_ALIGNMENT
       contents += colourLabel
-
       contents += Swing.VStrut(20)
-
       drawButton.xLayoutAlignment = java.awt.Component.CENTER_ALIGNMENT
       contents += drawButton
-
       undoButton.xLayoutAlignment = java.awt.Component.CENTER_ALIGNMENT
       contents += undoButton
+      contents += Swing.VGlue
     }
-
     centerPanel.contents += mainBox
-
     centerPanel.peer.revalidate()
     centerPanel.peer.repaint()
-  }
-
-  var selectionSource: () => Option[String] = () => {
-    val options = List("Red", "Blue", "Green", "Yellow")
-    Dialog.showInput(this, "Wähle eine Farbe:", "Wunschkarte",
-      Dialog.Message.Question, null, options, "Red")
-  }
-
-  def askForColour(): Colour.Value = mapSelectionToColour(selectionSource())
-
-  def mapSelectionToColour(selection: Option[String]): Colour.Value = selection match {
-    case Some("Red")    => Colour.Red
-    case Some("Blue")   => Colour.Blue
-    case Some("Green")  => Colour.Green
-    case Some("Yellow") => Colour.Yellow
-    case _              => Colour.Red
-  }
-
-  def handleGameOver(msg: String): Unit = {
-    Dialog.showMessage(this, msg, "Spiel vorbei")
-    this.dispose()
-  }
-
-  def handleCardClick(card: Card): Unit = {
-    if (card.colour == Colour.Black) controller.playCard(card, Some(askForColour()))
-    else controller.playCard(card)
-  }
-
-  private def getColor(colorName: String): Color = colorName.toLowerCase match {
-    case "red"    => Color.RED
-    case "blue"   => Color.BLUE
-    case "green"  => new Color(0, 150, 0)
-    case "yellow" => new Color(200, 160, 0)
-    case _        => Color.BLACK
   }
 
   override def update(): Unit = {
@@ -145,7 +103,7 @@ class SwingGui(controller: UnoLogic) extends Frame with Observer {
     cpuLabel.text = "Gegner hat: " + controller.state.cpuHand.count + " Karten"
 
     val pileCard = controller.state.pile
-    pilePanel = new CardPanel(getColor(pileCard.colour.toString), s"${pileCard.colour} ${pileCard.value}")
+    pilePanel = new CardPanel(getColor(pileCard.colour.toString), getCardValueSymbol(pileCard.value))
 
     val activeColorName = controller.state.activeColour.toString
     colourLabel.text = "Aktuelle Farbe: " + activeColorName
@@ -156,18 +114,40 @@ class SwingGui(controller: UnoLogic) extends Frame with Observer {
     handPanel.contents.clear()
     for (card <- controller.state.playerHand.cards) {
       val btnColor = getColor(card.colour.toString)
-      val button = new Button(s"${card.colour} ${card.value}") {
-        background = btnColor
-        foreground = Color.WHITE
-        opaque = true
-        borderPainted = true
+
+      val buttonText = getCardValueSymbol(card.value)
+
+      handPanel.contents += new Button(buttonText) {
+        background = btnColor; foreground = Color.WHITE; opaque = true; borderPainted = true
         reactions += { case ButtonClicked(_) => handleCardClick(card) }
       }
-      handPanel.contents += button
     }
-
     this.peer.revalidate()
     this.peer.repaint()
+  }
+
+  var selectionSource: () => Option[String] = () => {
+    val options = List("Red", "Blue", "Green", "Yellow")
+    Dialog.showInput(this, "Wähle eine Farbe:", "Wunschkarte", Dialog.Message.Question, null, options, "Red")
+  }
+
+  def askForColour(): Colour.Value = mapSelectionToColour(selectionSource())
+  def mapSelectionToColour(selection: Option[String]): Colour.Value = selection match {
+    case Some("Red") => Colour.Red; case Some("Blue") => Colour.Blue
+    case Some("Green") => Colour.Green; case Some("Yellow") => Colour.Yellow
+    case _ => Colour.Red
+  }
+
+  def handleGameOver(msg: String): Unit = { Dialog.showMessage(this, msg, "Spiel vorbei"); this.dispose() }
+  def handleCardClick(card: Card): Unit = {
+    if (card.colour == Colour.Black) controller.playCard(card, Some(askForColour()))
+    else controller.playCard(card)
+  }
+
+  private def getColor(colorName: String): Color = colorName.toLowerCase match {
+    case "red" => Color.RED; case "blue" => Color.BLUE
+    case "green" => new Color(0, 150, 0); case "yellow" => new Color(200, 160, 0)
+    case _ => Color.BLACK
   }
 
   controller.sortHandByColor()
