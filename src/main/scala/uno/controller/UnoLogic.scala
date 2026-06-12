@@ -5,8 +5,13 @@ import uno.util.Observable
 import uno.util.UndoManager
 import uno.util.Command
 
+
 class UnoLogic(var state: GameState) extends Observable {
   private val undoManager = new UndoManager()
+
+  private def autoSort(hand: Hand): Hand = {
+    new Hand(new SortByColorStrategy().sort(hand.cards))
+  }
 
   def canPlay(card: Card): Boolean = {
     card.colour == state.activeColour ||
@@ -18,7 +23,7 @@ class UnoLogic(var state: GameState) extends Observable {
     if (!canPlay(card)) {
       state = state.copy(statusMessage = "Ungültiger Zug!")
     } else {
-      val newPlayerHand = new Hand(state.playerHand.cards.diff(List(card)))
+      val newPlayerHand = autoSort(new Hand(state.playerHand.cards.diff(List(card))))
       val nextColour = if (card.colour == Colour.Black) chosenColour.getOrElse(Colour.Red) else card.colour
 
       val (newCpuHand, nextTurnIsPlayer, msgSuffix) = card.value match {
@@ -73,7 +78,7 @@ class UnoLogic(var state: GameState) extends Observable {
 
         state = state.copy(
           cpuHand = newCpuHand,
-          playerHand = newPlayerHand,
+          playerHand = autoSort(newPlayerHand),
           pile = card,
           activeColour = nextColour,
           isPlayerTurn = nextTurnIsPlayer,
@@ -87,10 +92,24 @@ class UnoLogic(var state: GameState) extends Observable {
   def drawCard(): Unit = {
     val newCard = Draw.draw()
     if (state.isPlayerTurn) {
-      state = state.copy(playerHand = state.playerHand.add(newCard), isPlayerTurn = false, statusMessage = "Gezogen.")
+      state = state.copy(playerHand = autoSort(state.playerHand.add(newCard)), isPlayerTurn = false, statusMessage = "Gezogen.")
     } else {
       state = state.copy(cpuHand = state.cpuHand.add(newCard), isPlayerTurn = true, statusMessage = "CPU zieht.")
     }
+    notifyObservers()
+  }
+
+  def sortHandByColor(): Unit = {
+    val sortedCards = new SortByColorStrategy().sort(state.playerHand.cards)
+    val sortedHand = new Hand(sortedCards)
+    state = state.copy(playerHand = sortedHand, statusMessage = "Karten wurden nach Farbe sortiert.")
+    notifyObservers()
+  }
+
+  def sortHandByValue(): Unit = {
+    val sortedCards = new SortByValueStrategy().sort(state.playerHand.cards)
+    val sortedHand = new Hand(sortedCards)
+    state = state.copy(playerHand = sortedHand, statusMessage = "Karten wurden nach Zahl sortiert.")
     notifyObservers()
   }
 } 

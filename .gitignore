@@ -9,6 +9,7 @@ project/project/
 
 # --- Metals & Scala Tooling ---
 .metals/
+project/metals.sbt
 .bloop/
 .ammonite/
 .scala-build/

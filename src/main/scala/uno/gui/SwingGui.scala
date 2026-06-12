@@ -119,5 +119,7 @@ class SwingGui(controller: UnoLogic) extends Frame with Observer {
     this.repaint()
   }
 
+  controller.sortHandByColor()
+
   visible = true
 }
