@@ -7,6 +7,36 @@ import uno.util.Observer
 import uno.model._
 import java.awt.Color
 
+class CardPanel(color: Color, valueText: String) extends Component {
+  val cardWidth = 100
+  val cardHeight = 150
+  preferredSize = new Dimension(cardWidth, cardHeight)
+  maximumSize = new Dimension(cardWidth, cardHeight)
+
+  override def paintComponent(g: Graphics2D): Unit = {
+    // Hintergrund
+    g.setColor(color)
+    g.fillRoundRect(0, 0, cardWidth, cardHeight, 20, 20)
+
+    // Rahmen
+    g.setColor(Color.WHITE)
+    g.setStroke(new java.awt.BasicStroke(3))
+    g.drawRoundRect(0, 0, cardWidth - 1, cardHeight - 1, 20, 20)
+
+    // Text zentrieren
+    g.setColor(Color.WHITE)
+    val font = new java.awt.Font("Arial", java.awt.Font.BOLD, 12)
+    g.setFont(font)
+
+    val metrics = g.getFontMetrics(font)
+    val textWidth = metrics.stringWidth(valueText)
+    val x = (cardWidth - textWidth) / 2
+    val y = (cardHeight - metrics.getHeight) / 2 + metrics.getAscent
+
+    g.drawString(valueText, x, y)
+  }
+}
+
 class SwingGui(controller: UnoLogic) extends Frame with Observer {
   controller.add(this)
 
@@ -15,14 +45,21 @@ class SwingGui(controller: UnoLogic) extends Frame with Observer {
 
   val cpuLabel = new Label("Gegner hat: " + controller.state.cpuHand.count + " Karten")
   val statusLabel = new Label("Willkommen bei Uno!")
-  val pileLabel = new Label("Stapel: " + controller.state.pile)
   val colourLabel = new Label("Aktuelle Farbe: " + controller.state.activeColour)
+
+  var pilePanel: Component = new CardPanel(Color.GRAY, "Uno")
 
   val drawButton = new Button("Karte ziehen") {
     reactions += { case ButtonClicked(_) => controller.drawCard() }
   }
 
+  val undoButton = new Button("Undo") {
+    reactions += { case ButtonClicked(_) => controller.undo() }
+  }
+
   val handPanel = new GridPanel(0, 4) { vGap = 5; hGap = 5 }
+
+  val centerPanel = new BoxPanel(Orientation.Vertical)
 
   contents = new BorderPanel {
     add(new BoxPanel(Orientation.Vertical) {
@@ -30,18 +67,39 @@ class SwingGui(controller: UnoLogic) extends Frame with Observer {
       contents += statusLabel
     }, BorderPanel.Position.North)
 
-    val centerPanel = new BoxPanel(Orientation.Horizontal) {
-      contents += Swing.HGlue
-      contents += new BoxPanel(Orientation.Vertical) {
-        contents += pileLabel
-        contents += colourLabel
-        contents += Swing.VStrut(20)
-        contents += drawButton
-      }
-      contents += Swing.HGlue
-    }
     add(centerPanel, BorderPanel.Position.Center)
     add(new ScrollPane(handPanel), BorderPanel.Position.South)
+  }
+
+  updateCenterPanel()
+
+  def updateCenterPanel(): Unit = {
+    centerPanel.contents.clear()
+
+    val mainBox = new BoxPanel(Orientation.Vertical) {
+      contents += new BorderPanel {
+        preferredSize = new Dimension(100, 150)
+        maximumSize = new Dimension(100, 150)
+        add(pilePanel, BorderPanel.Position.Center)
+        xLayoutAlignment = java.awt.Component.CENTER_ALIGNMENT
+      }
+
+      colourLabel.xLayoutAlignment = java.awt.Component.CENTER_ALIGNMENT
+      contents += colourLabel
+
+      contents += Swing.VStrut(20)
+
+      drawButton.xLayoutAlignment = java.awt.Component.CENTER_ALIGNMENT
+      contents += drawButton
+
+      undoButton.xLayoutAlignment = java.awt.Component.CENTER_ALIGNMENT
+      contents += undoButton
+    }
+
+    centerPanel.contents += mainBox
+
+    centerPanel.peer.revalidate()
+    centerPanel.peer.repaint()
   }
 
   var selectionSource: () => Option[String] = () => {
@@ -50,10 +108,7 @@ class SwingGui(controller: UnoLogic) extends Frame with Observer {
       Dialog.Message.Question, null, options, "Red")
   }
 
-  def askForColour(): Colour.Value = {
-    val selection = selectionSource()
-    mapSelectionToColour(selection)
-  }
+  def askForColour(): Colour.Value = mapSelectionToColour(selectionSource())
 
   def mapSelectionToColour(selection: Option[String]): Colour.Value = selection match {
     case Some("Red")    => Colour.Red
@@ -69,11 +124,8 @@ class SwingGui(controller: UnoLogic) extends Frame with Observer {
   }
 
   def handleCardClick(card: Card): Unit = {
-    if (card.colour == Colour.Black) {
-      controller.playCard(card, Some(askForColour()))
-    } else {
-      controller.playCard(card)
-    }
+    if (card.colour == Colour.Black) controller.playCard(card, Some(askForColour()))
+    else controller.playCard(card)
   }
 
   private def getColor(colorName: String): Color = colorName.toLowerCase match {
@@ -86,40 +138,38 @@ class SwingGui(controller: UnoLogic) extends Frame with Observer {
 
   override def update(): Unit = {
     if (controller.state.playerHand.cards.isEmpty || controller.state.cpuHand.cards.isEmpty) {
-      val msg = if (controller.state.playerHand.cards.isEmpty) "Du hast gewonnen!" else "Der Gegner hat gewonnen!"
-      handleGameOver(msg)
+      handleGameOver(if (controller.state.playerHand.cards.isEmpty) "Du hast gewonnen!" else "Der Gegner hat gewonnen!")
     }
 
     statusLabel.text = controller.state.statusMessage
-    pileLabel.text = "Stapel: " + controller.state.pile
     cpuLabel.text = "Gegner hat: " + controller.state.cpuHand.count + " Karten"
+
+    val pileCard = controller.state.pile
+    pilePanel = new CardPanel(getColor(pileCard.colour.toString), s"${pileCard.colour} ${pileCard.value}")
 
     val activeColorName = controller.state.activeColour.toString
     colourLabel.text = "Aktuelle Farbe: " + activeColorName
     colourLabel.foreground = getColor(activeColorName)
 
+    updateCenterPanel()
+
     handPanel.contents.clear()
     for (card <- controller.state.playerHand.cards) {
       val btnColor = getColor(card.colour.toString)
-      val button = new Button() {
-        text = s"${card.colour} ${card.value}"
+      val button = new Button(s"${card.colour} ${card.value}") {
         background = btnColor
         foreground = Color.WHITE
         opaque = true
         borderPainted = true
-
-        reactions += {
-          case ButtonClicked(_) => handleCardClick(card)
-        }
+        reactions += { case ButtonClicked(_) => handleCardClick(card) }
       }
       handPanel.contents += button
     }
-    handPanel.peer.revalidate()
+
     this.peer.revalidate()
-    this.repaint()
+    this.peer.repaint()
   }
 
   controller.sortHandByColor()
-
   visible = true
 }
