@@ -8,7 +8,9 @@ class PlaceCardCommand(controller: UnoLogic, card: Card, chosenColour: Option[un
   private val stateBefore = controller.state.copy()
 
   override def execute(): Unit = {
-    controller.executePlaceCard(card, chosenColour)
+    if (controller.canPlay(card)) {
+      controller.executePlaceCard(card, chosenColour)
+    }
   }
 
   override def undo(): Unit = {
