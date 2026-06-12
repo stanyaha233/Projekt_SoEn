@@ -43,7 +43,12 @@ class UnoLogic(var state: GameState) extends Observable {
   }
 
   def playCard(card: Card, chosenColour: Option[Colour.Value] = None): Unit = {
-    undoManager.executeCommand(new PlaceCardCommand(this, card, chosenColour))
+    if (canPlay(card)) {
+      undoManager.executeCommand(new PlaceCardCommand(this, card, chosenColour))
+    } else {
+      state = state.copy(statusMessage = "Ungültiger Zug!")
+      notifyObservers()
+    }
   }
 
   def undo(): Unit = {
