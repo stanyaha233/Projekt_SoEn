@@ -45,48 +45,55 @@ class UnoLogic(var state: GameState) extends Observable {
     }
   }
 
-    
+
   def playCard(card: Card, chosenColour: Option[Colour.Value] = None): Unit = {
-      if (canPlay(card)) {
-        undoManager.executeCommand(new PlaceCardCommand(this, card, chosenColour))
+    if (canPlay(card)) {
+      undoManager.executeCommand(new PlaceCardCommand(this, card, chosenColour))
+
+      if (!state.isPlayerTurn) {
+        cpuTurn()
       } else {
-        state = state.copy(statusMessage = "Ungültiger Zug!")
         notifyObservers()
       }
+    } else {
+      state = state.copy(statusMessage = "Ungültiger Zug!")
+      notifyObservers()
+    }
   }
 
   def undo(): Unit = {
-        undoManager.undo()
-        notifyObservers()
+    undoManager.undo()
+    notifyObservers()
   }
 
   def cpuTurn(): Unit = {
-        state.cpuHand.cards.find(c => canPlay(c)) match {
-          case Some(card) =>
-            val newCpuHand = new Hand(state.cpuHand.cards.filterNot(_ == card))
-            var newPlayerHand = state.playerHand
-            var nextTurnIsPlayer = true
-            val cpuWish = newCpuHand.cards.headOption.map(_.colour).find(_ != Colour.Black).getOrElse(Colour.Red)
-            val nextColour = if (card.colour == Colour.Black) cpuWish else card.colour
-            card.value match {
-              case Number.plus2 => for (_ <- 1 to 2) newPlayerHand = newPlayerHand.add(Draw.draw())
-              case Number.plus4 => for (_ <- 1 to 4) newPlayerHand = newPlayerHand.add(Draw.draw())
-              case Number.skip | Number.directionchange => nextTurnIsPlayer = false
-              case _ => nextTurnIsPlayer = true
-            }
-
-            state = state.copy(
-              cpuHand = newCpuHand,
-              playerHand = autoSort(newPlayerHand),
-              pile = card,
-              activeColour = nextColour,
-              isPlayerTurn = nextTurnIsPlayer,
-              statusMessage = s"Gegner legt ${card.colour} ${card.value}"
-            )
-            notifyObservers()
-          case None => drawCard()
+    state.cpuHand.cards.find(c => canPlay(c)) match {
+      case Some(card) =>
+        val newCpuHand = new Hand(state.cpuHand.cards.filterNot(_ == card))
+        var newPlayerHand = state.playerHand
+        var nextTurnIsPlayer = true
+        val cpuWish = newCpuHand.cards.headOption.map(_.colour).find(_ != Colour.Black).getOrElse(Colour.Red)
+        val nextColour = if (card.colour == Colour.Black) cpuWish else card.colour
+        card.value match {
+          case Number.plus2 => for (_ <- 1 to 2) newPlayerHand = newPlayerHand.add(Draw.draw())
+          case Number.plus4 => for (_ <- 1 to 4) newPlayerHand = newPlayerHand.add(Draw.draw())
+          case Number.skip | Number.directionchange => nextTurnIsPlayer = false
+          case _ => nextTurnIsPlayer = true
         }
-      }
+
+        state = state.copy(
+          cpuHand = newCpuHand,
+          playerHand = autoSort(newPlayerHand),
+          pile = card,
+          activeColour = nextColour,
+          isPlayerTurn = nextTurnIsPlayer,
+          statusMessage = s"Gegner legt ${card.colour} ${card.value}"
+        )
+        notifyObservers()
+      case None => drawCard()
+    }
+  }
+
 
   def drawCard(): Unit = {
         val drawResult: Try[Card] = Try(Draw.draw())
