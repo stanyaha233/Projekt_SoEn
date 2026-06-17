@@ -96,20 +96,30 @@ class UnoLogic(var state: GameState) extends Observable {
 
 
   def drawCard(): Unit = {
-        val drawResult: Try[Card] = Try(Draw.draw())
+    val drawResult: Try[Card] = Try(Draw.draw())
 
-        drawResult match {
-          case Success(newCard) =>
-            val nextState = if (state.isPlayerTurn) {
-              state.copy(playerHand = autoSort(state.playerHand.add(newCard)), isPlayerTurn = false, statusMessage = "Gezogen.")
-            } else {
-              state.copy(cpuHand = state.cpuHand.add(newCard), isPlayerTurn = true, statusMessage = "CPU zieht.")
-            }
-            state = nextState
-          case Failure(e) =>
-            state = state.copy(statusMessage = "Stapel ist leer!")
+    drawResult match {
+      case Success(newCard) =>
+        if (state.isPlayerTurn) {
+          state = state.copy(
+            playerHand = autoSort(state.playerHand.add(newCard)),
+            isPlayerTurn = false,
+            statusMessage = "Karte gezogen. Gegner ist am Zug."
+          )
+          notifyObservers()
+          cpuTurn()
+        } else {
+          state = state.copy(
+            cpuHand = state.cpuHand.add(newCard),
+            isPlayerTurn = true,
+            statusMessage = "CPU hat gezogen."
+          )
+          notifyObservers()
         }
+      case Failure(_) =>
+        state = state.copy(statusMessage = "Stapel ist leer!")
         notifyObservers()
+    }
   }
 
   def sortHandByColor(): Unit = {
