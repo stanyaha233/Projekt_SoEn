@@ -7,7 +7,7 @@ import uno.util.Command
 import scala.util.{Try, Success, Failure}
 
 
-class UnoLogic(var state: GameState) extends Observable {
+class UnoLogic(var state: GameState) extends ControllerInterface {
   private val undoManager = new UndoManager()
 
   private def autoSort(hand: Hand): Hand = {
@@ -135,5 +135,10 @@ class UnoLogic(var state: GameState) extends Observable {
         state = state.copy(playerHand = sortedHand, statusMessage = "Karten wurden nach Zahl sortiert.")
         notifyObservers()
       }
+
+  def setMessage(msg: String): Unit = {
+    state = state.copy(statusMessage = msg)
+    notifyObservers()
   }
+}
   

@@ -1,8 +1,20 @@
 package uno.model
 import scala.util.Random
 
-object DeckFactory {
-  def createStandardDeck(): List[Card] = {
+trait DeckProvider {
+  def createStandardDeck(): List[Card]
+}
+
+trait CardDrawer {
+  def draw(): Card
+  def beginningHand(hand: Hand): Hand
+  def pileSize: Int
+  def getDeck: List[Card]
+  def setDeck(deck: List[Card]): Unit
+}
+
+object DeckFactory extends DeckProvider {
+  override def createStandardDeck(): List[Card] = {
     val normalColours = Colour.values.filterNot(_ == Colour.Black).toList
     val nonZeroNumbers = Number.values.filterNot(n => n == Number.plus4 || n == Number.choice || n == Number.zero).toList
 
@@ -20,10 +32,16 @@ object DeckFactory {
   }
 }
 
-object Draw {
-  var drawPile: List[Card] = DeckFactory.createStandardDeck()
+object Draw extends CardDrawer {
+  private var drawPile: List[Card] = DeckFactory.createStandardDeck()
 
-  def draw(): Card = {
+  override def getDeck: List[Card] = drawPile
+  
+  override def setDeck(deck: List[Card]): Unit = drawPile = deck
+  
+  override def pileSize: Int = drawPile.length
+
+  override def draw(): Card = {
     if (drawPile.isEmpty) {
       drawPile = DeckFactory.createStandardDeck()
     }
@@ -32,7 +50,7 @@ object Draw {
     card
   }
 
-  def beginningHand(hand: Hand): Hand = {
+  override def beginningHand(hand: Hand): Hand = {
     var currentHand = hand
     while (currentHand.count < 7) {
       currentHand = currentHand.add(draw())

@@ -8,5 +8,5 @@ case class GameState(
                       isPlayerTurn: Boolean,
                       statusMessage: String = "Spiel startet!",
                       unoSaid: Boolean = false
-                    )
+                    ) extends GameStateInterface
 

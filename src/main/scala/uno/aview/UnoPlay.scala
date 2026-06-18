@@ -2,10 +2,14 @@ package uno.aview
 
 import scala.io.StdIn
 import uno.model._
-import uno.controller.UnoLogic
+import uno.controller.ControllerInterface
 import uno.util.Observer
 
-class UnoPlay(controller: UnoLogic) extends Observer {
+trait TuiInterface {
+  def processInputLine(input: String): Unit
+}
+
+class UnoPlay(controller: ControllerInterface) extends Observer with TuiInterface {
 
   controller.add(this)
 
@@ -31,7 +35,7 @@ class UnoPlay(controller: UnoLogic) extends Observer {
     }
   }
 
-  def parseInput(input: String): Unit = {
+  private def parseInput(input: String): Unit = {
     try {
       val parts = input.split(" ")
       if (parts.length < 2) throw new IllegalArgumentException("Incomplete input")
@@ -43,39 +47,26 @@ class UnoPlay(controller: UnoLogic) extends Observer {
         case Some(c) =>
           if (c.colour == Colour.Black) {
             println("Wähle Farbe (Red, Green, Blue, Yellow):")
-            val chosen = Colour.withName(StdIn.readLine().capitalize)
+            val inputColor = StdIn.readLine()
+            val chosen = if (inputColor != null && inputColor.trim.nonEmpty) Colour.withName(inputColor.trim.capitalize) else Colour.Red
             controller.playCard(c, Some(chosen))
           } else {
             controller.playCard(c)
           }
         case None => 
-          controller.state = controller.state.copy(statusMessage = "Diese Karte hast du nicht!")
-          controller.notifyObservers()
-      }
+          controller.setMessage("Diese Karte hast du nicht!")
+     }
     } catch {
       case _: IllegalArgumentException | _: NoSuchElementException => 
-        controller.state = controller.state.copy(statusMessage = "Eingabe falsch!")
-        controller.notifyObservers()
+        controller.setMessage("Eingabe falsch!")
     }
   }
 
-  def readInput(): Unit = {
-    while (controller.state.playerHand.count > 0 && controller.state.cpuHand.count > 0) {
-      if (controller.state.isPlayerTurn) {
-        val input = StdIn.readLine("Zug (Farbe Wert) oder 'draw': ").trim.toLowerCase
-
-        input match {
-          case "undo" =>
-            controller.undo()
-          case "draw" =>
-            controller.drawCard()
-          case _ =>
-            parseInput(input)
-        }
-      } else {
-        Thread.sleep(1000)
-        controller.cpuTurn()
-      }
+  override def processInputLine(input: String): Unit = {
+    input match {
+      case "undo" => controller.undo()
+      case "draw" => controller.drawCard()
+      case _ => parseInput(input)
     }
   }
 }

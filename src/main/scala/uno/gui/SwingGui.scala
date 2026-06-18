@@ -2,14 +2,14 @@ package uno.gui
 
 import scala.swing._
 import scala.swing.event._
-import uno.controller.UnoLogic
+import uno.controller.ControllerInterface
 import uno.util.Observer
 import uno.model._
 import java.awt.Color
 
-class CardPanel(color: Color, valueText: String) extends Component {
-  val cardWidth = 100
-  val cardHeight = 150
+private[gui] class CardPanel(color: Color, valueText: String) extends Component {
+  private val cardWidth = 100
+  private val cardHeight = 150
   preferredSize = new Dimension(cardWidth, cardHeight)
   maximumSize = new Dimension(cardWidth, cardHeight)
 
@@ -30,28 +30,28 @@ class CardPanel(color: Color, valueText: String) extends Component {
   }
 }
 
-class SwingGui(controller: UnoLogic) extends Frame with Observer {
+class SwingGui(controller: ControllerInterface) extends Frame with Observer {
   controller.add(this)
 
   title = "Uno GUI"
   minimumSize = new Dimension(700, 450)
 
-  val cpuLabel = new Label("Gegner hat: " + controller.state.cpuHand.count + " Karten")
-  val statusLabel = new Label("Willkommen bei Uno!")
-  val colourLabel = new Label("Aktuelle Farbe: " + controller.state.activeColour)
+  private val cpuLabel = new Label("Gegner hat: " + controller.state.cpuHand.count + " Karten")
+  private val statusLabel = new Label("Willkommen bei Uno!")
+  private val colourLabel = new Label("Aktuelle Farbe: " + controller.state.activeColour)
 
-  var pilePanel: Component = new CardPanel(Color.GRAY, "Uno")
+  private var pilePanel: Component = new CardPanel(Color.GRAY, "Uno")
 
-  val drawButton = new Button("Karte ziehen") {
+  private val drawButton = new Button("Karte ziehen") {
     reactions += { case ButtonClicked(_) => controller.drawCard() }
   }
 
-  val undoButton = new Button("Undo") {
+  private val undoButton = new Button("Undo") {
     reactions += { case ButtonClicked(_) => controller.undo() }
   }
 
-  val handPanel = new GridPanel(0, 4) { vGap = 5; hGap = 5 }
-  val centerPanel = new BoxPanel(Orientation.Vertical)
+  private val handPanel = new GridPanel(0, 4) { vGap = 5; hGap = 5 }
+  private val centerPanel = new BoxPanel(Orientation.Vertical)
 
   contents = new BorderPanel {
     add(new BoxPanel(Orientation.Vertical) {
@@ -70,7 +70,7 @@ class SwingGui(controller: UnoLogic) extends Frame with Observer {
     case "nine"  => "9"; case _ => value.toString
   }
 
-  def updateCenterPanel(): Unit = {
+  private def updateCenterPanel(): Unit = {
     centerPanel.contents.clear()
     val mainBox = new BoxPanel(Orientation.Vertical) {
       contents += Swing.VGlue
@@ -126,20 +126,20 @@ class SwingGui(controller: UnoLogic) extends Frame with Observer {
     this.peer.repaint()
   }
 
-  var selectionSource: () => Option[String] = () => {
+  private var selectionSource: () => Option[String] = () => {
     val options = List("Red", "Blue", "Green", "Yellow")
     Dialog.showInput(this, "Wähle eine Farbe:", "Wunschkarte", Dialog.Message.Question, null, options, "Red")
   }
 
-  def askForColour(): Colour.Value = mapSelectionToColour(selectionSource())
-  def mapSelectionToColour(selection: Option[String]): Colour.Value = selection match {
+  private def askForColour(): Colour.Value = mapSelectionToColour(selectionSource())
+  private def mapSelectionToColour(selection: Option[String]): Colour.Value = selection match {
     case Some("Red") => Colour.Red; case Some("Blue") => Colour.Blue
     case Some("Green") => Colour.Green; case Some("Yellow") => Colour.Yellow
     case _ => Colour.Red
   }
 
-  def handleGameOver(msg: String): Unit = { Dialog.showMessage(this, msg, "Spiel vorbei"); this.dispose() }
-  def handleCardClick(card: Card): Unit = {
+  private def handleGameOver(msg: String): Unit = { Dialog.showMessage(this, msg, "Spiel vorbei"); this.dispose() }
+  private def handleCardClick(card: Card): Unit = {
     if (card.colour == Colour.Black) controller.playCard(card, Some(askForColour()))
     else controller.playCard(card)
   }
