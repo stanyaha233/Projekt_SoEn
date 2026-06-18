@@ -40,18 +40,23 @@ class UnoLogicSpec extends AnyFlatSpec with Matchers {
   "UnoLogic.playCard" should "handle all card types for coverage" in {
     val baseState = GameState(new Hand(Nil), new Hand(List(Card(Colour.Blue, Number.nine))), Card(Colour.Red, Number.zero), Colour.Red, true)
 
+    val canPlayLogic = new UnoLogic(baseState)
+    canPlayLogic.canPlay(Card(Colour.Green, Number.one)) should be(false)
+
     val logicNormal = new UnoLogic(baseState.copy(playerHand = new Hand(List(Card(Colour.Red, Number.five)))))
     logicNormal.playCard(Card(Colour.Red, Number.five))
     logicNormal.state.playerHand.count should be(0)
     Seq(1, 2) should contain (logicNormal.state.cpuHand.count) // CPU zieht nach, legt aber eventuell direkt
 
+    val directNormalLogic = new UnoLogic(baseState.copy(playerHand = new Hand(List(Card(Colour.Red, Number.five)))))
+    directNormalLogic.executePlaceCard(Card(Colour.Red, Number.five))
+    directNormalLogic.state.statusMessage should be("Du legst Red five")
+
     val logicP2 = new UnoLogic(baseState.copy(playerHand = new Hand(List(Card(Colour.Red, Number.plus2)))))
     logicP2.playCard(Card(Colour.Red, Number.plus2))
-    Seq(2, 3, 4) should contain (logicP2.state.cpuHand.count) // 1 + 2 = 3, kann aber ziehen/legen
 
     val logicP4 = new UnoLogic(baseState.copy(playerHand = new Hand(List(Card(Colour.Black, Number.plus4)))))
     logicP4.playCard(Card(Colour.Black, Number.plus4), Some(Colour.Blue))
-    Seq(4, 5, 6) should contain (logicP4.state.cpuHand.count) // 1 + 4 = 5, kann aber ziehen/legen
     logicP4.state.activeColour should be(Colour.Blue)
 
     val logicSkip = new UnoLogic(baseState.copy(playerHand = new Hand(List(Card(Colour.Red, Number.skip)))))
@@ -76,6 +81,48 @@ class UnoLogicSpec extends AnyFlatSpec with Matchers {
 
     val logicNotOwned = new UnoLogic(baseState.copy(playerHand = new Hand(List(Card(Colour.Red, Number.one)))))
     logicNotOwned.playCard(Card(Colour.Red, Number.five))
+  }
+
+  it should "update the status message for special playCard branches" in {
+    val plus2State = GameState(new Hand(List(Card(Colour.Red, Number.plus2))), new Hand(List(Card(Colour.Blue, Number.nine))), Card(Colour.Red, Number.zero), Colour.Red, true)
+    val plus2Logic = new UnoLogic(plus2State)
+    plus2Logic.executePlaceCard(Card(Colour.Red, Number.plus2))
+    plus2Logic.state.statusMessage should be("Du legst Red plus2. CPU zieht 2!")
+    plus2Logic.state.isPlayerTurn should be(false)
+    plus2Logic.state.cpuHand.count should be(3)
+
+    val plus4State = GameState(new Hand(List(Card(Colour.Black, Number.plus4))), new Hand(List(Card(Colour.Blue, Number.nine))), Card(Colour.Red, Number.zero), Colour.Red, true)
+    val plus4Logic = new UnoLogic(plus4State)
+    plus4Logic.executePlaceCard(Card(Colour.Black, Number.plus4), Some(Colour.Blue))
+    plus4Logic.state.statusMessage should be("Du legst Black plus4. CPU zieht 4!")
+    plus4Logic.state.activeColour should be(Colour.Blue)
+    plus4Logic.state.isPlayerTurn should be(false)
+    plus4Logic.state.cpuHand.count should be(5)
+
+    val skipState = GameState(new Hand(List(Card(Colour.Red, Number.skip))), new Hand(List(Card(Colour.Blue, Number.nine))), Card(Colour.Red, Number.zero), Colour.Red, true)
+    val skipLogic = new UnoLogic(skipState)
+    skipLogic.executePlaceCard(Card(Colour.Red, Number.skip))
+    skipLogic.state.statusMessage should be("Du legst Red skip. Du bist nochmal dran!")
+    skipLogic.state.isPlayerTurn should be(true)
+  }
+
+  it should "detect playable and unplayable cards via canPlay" in {
+    val state = GameState(new Hand(List(Card(Colour.Red, Number.one))), new Hand(List(Card(Colour.Blue, Number.two))), Card(Colour.Red, Number.zero), Colour.Red, true)
+    val logic = new UnoLogic(state)
+
+    logic.canPlay(Card(Colour.Black, Number.choice)) should be(true)
+    logic.canPlay(Card(Colour.Green, Number.one)) should be(false)
+  }
+
+  it should "reject invalid executePlaceCard moves without changing the pile" in {
+    val invalidState = GameState(new Hand(List(Card(Colour.Green, Number.one))), new Hand(Nil), Card(Colour.Red, Number.zero), Colour.Blue, true)
+    val logic = new UnoLogic(invalidState)
+
+    logic.executePlaceCard(Card(Colour.Green, Number.one))
+
+    logic.state.playerHand should be(invalidState.playerHand)
+    logic.state.pile should be(invalidState.pile)
+    logic.state.statusMessage should be("Ungültiger Zug!")
   }
 
   "UnoLogic.cpuTurn" should "handle all CPU cases" in {
@@ -120,6 +167,18 @@ class UnoLogicSpec extends AnyFlatSpec with Matchers {
     logicWish.cpuTurn()
     logicWish.state.activeColour should be(Colour.Green)
     logicWish.state.isPlayerTurn should be(true)
+
+    val cpuColourState = GameState(
+      new Hand(Nil),
+      new Hand(List(Card(Colour.Red, Number.five), Card(Colour.Black, Number.choice), Card(Colour.Green, Number.one))),
+      Card(Colour.Red, Number.zero),
+      Colour.Red,
+      false
+    )
+    val logicColour = new UnoLogic(cpuColourState)
+    logicColour.cpuTurn()
+    logicColour.state.pile should be(Card(Colour.Red, Number.five))
+    logicColour.state.activeColour should be(Colour.Red)
   }
 
   it should "handle cpuWish logic branches" in {
@@ -140,15 +199,20 @@ class UnoLogicSpec extends AnyFlatSpec with Matchers {
   "UnoLogic.drawCard" should "handle player and cpu drawing" in {
     val state = GameState(new Hand(List(Card(Colour.Green, Number.five))), new Hand(List(Card(Colour.Blue, Number.nine))), Card(Colour.Red, Number.one), Colour.Red, true)
     
-    val logicP = new UnoLogic(state)
+    val logicP = new UnoLogic(state) {
+      override def cpuTurn(): Unit = ()
+    }
     logicP.drawCard()
     logicP.state.playerHand.count should be(2)
     Seq(1, 2) should contain (logicP.state.cpuHand.count) // CPU kann ziehen oder legen
+    logicP.state.isPlayerTurn should be(false)
+    logicP.state.statusMessage should be("Karte gezogen. Gegner ist am Zug.")
 
     val logicC = new UnoLogic(state.copy(isPlayerTurn = false))
     logicC.drawCard()
     logicC.state.cpuHand.count should be(2)
     logicC.state.isPlayerTurn should be(true)
+    logicC.state.statusMessage should be("CPU hat gezogen.")
   }
 
   "Card" should "be correctly instantiated" in {
@@ -185,15 +249,11 @@ class UnoLogicSpec extends AnyFlatSpec with Matchers {
   it should "handle drawCard failure when pile throws exception safely" in {
     val state = GameState(new Hand(Nil), new Hand(Nil), Card(Colour.Blue, Number.two), Colour.Blue, true)
     val logic = new UnoLogic(state)
-    val backupPile = Draw.getDeck
     
     try {
       Draw.setDeck(null) // Provoziere absichtlich einen Fehler (NPE) für den Failure-Zweig
-      try {
-        logic.drawCard()
-      } catch {
-        case _: Exception => // Ignoriere den Fehler, falls UnoLogic ihn nicht intern abfängt
-      }
+      logic.drawCard()
+      logic.state.statusMessage should be("Stapel ist leer!")
     } finally {
       Draw.setDeck(DeckFactory.createStandardDeck()) // Stapel immer sicher mit frischen Karten wiederherstellen!
     }

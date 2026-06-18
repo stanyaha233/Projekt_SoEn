@@ -1,5 +1,6 @@
 package uno.aview
 
+import com.google.inject.Inject
 import scala.io.StdIn
 import uno.model._
 import uno.controller.ControllerInterface
@@ -9,29 +10,29 @@ trait TuiInterface {
   def processInputLine(input: String): Unit
 }
 
-class UnoPlay(controller: ControllerInterface) extends Observer with TuiInterface {
+class UnoPlay @Inject() (controller: ControllerInterface) extends Observer with TuiInterface {
 
   controller.add(this)
 
   override def update(): Unit = {
     val state = controller.state
 
-    if (state.playerHand.count > 0 && state.cpuHand.count > 0) {
+    if (controller.isGameActive) {
       println(s"\n--- ${state.statusMessage} ---")
-      println(s"Aktuelle Farbe: ${state.activeColour} | Karte auf Stapel: ${state.pile.colour} ${state.pile.value}")
-      println(s"Gegner Karten: ${state.cpuHand.count}")
+      println(s"Aktuelle Farbe: ${controller.activeColour} | Karte auf Stapel: ${controller.pileCard.colour} ${controller.pileCard.value}")
+      println(s"Gegner Karten: ${controller.cpuHandCount}")
 
-      if (state.isPlayerTurn) {
-        val coloredHand = state.playerHand.cards.map(c => formatCard(c)).mkString(" ")
+      if (controller.isPlayerTurn) {
+        val coloredHand = controller.playerHandCards.map(c => formatCard(c)).mkString(" ")
         println(s"Deine Hand: $coloredHand")
 
-        if (!state.playerHand.possible(state.pile)) {
+        if (!state.playerHand.possible(controller.pileCard)) {
           println("Du kannst nicht legen. Tippe 'draw' zum Ziehen.")
         }
       }
     } else {
-      if (state.playerHand.count == 0) println("GLÜCKWUNSCH! Du hast gewonnen!")
-      else if (state.cpuHand.count == 0) println("SCHADE! Der Gegner hat gewonnen!")
+      if (controller.playerHandCount == 0) println("GLÜCKWUNSCH! Du hast gewonnen!")
+      else if (controller.cpuHandCount == 0) println("SCHADE! Der Gegner hat gewonnen!")
     }
   }
 
@@ -43,7 +44,7 @@ class UnoPlay(controller: ControllerInterface) extends Observer with TuiInterfac
       val col = Colour.withName(parts(0).capitalize)
       val valNum = Number.withName(parts(1))
 
-      controller.state.playerHand.cards.find(c => c.colour == col && c.value == valNum) match {
+      controller.playerHandCards.find(c => c.colour == col && c.value == valNum) match {
         case Some(c) =>
           if (c.colour == Colour.Black) {
             println("Wähle Farbe (Red, Green, Blue, Yellow):")

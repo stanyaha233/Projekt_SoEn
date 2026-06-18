@@ -2,13 +2,22 @@ package uno.controller
 
 import uno.model._
 import uno.util.Observable
+import com.google.inject.Inject
 import uno.util.UndoManager
 import uno.util.Command
 import scala.util.{Try, Success, Failure}
 
 
-class UnoLogic(var state: GameState) extends ControllerInterface {
+class UnoLogic @Inject() (var state: GameState) extends ControllerInterface {
   private val undoManager = new UndoManager()
+
+  override def playerHandCards: List[Card] = state.playerHand.cards
+  override def playerHandCount: Int = state.playerHand.count
+  override def cpuHandCount: Int = state.cpuHand.count
+  override def pileCard: Card = state.pile
+  override def activeColour: Colour.Value = state.activeColour
+  override def isPlayerTurn: Boolean = state.isPlayerTurn
+  override def isGameActive: Boolean = state.isGameActive
 
   private def autoSort(hand: Hand): Hand = {
     new Hand(new SortByColorStrategy().sort(hand.cards))

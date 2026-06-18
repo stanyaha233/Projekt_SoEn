@@ -1,5 +1,6 @@
 package uno.gui
 
+import com.google.inject.Inject
 import scala.swing._
 import scala.swing.event._
 import uno.controller.ControllerInterface
@@ -30,15 +31,15 @@ private[gui] class CardPanel(color: Color, valueText: String) extends Component 
   }
 }
 
-class SwingGui(controller: ControllerInterface) extends Frame with Observer {
+class SwingGui @Inject() (controller: ControllerInterface) extends Frame with Observer {
   controller.add(this)
 
   title = "Uno GUI"
   minimumSize = new Dimension(700, 450)
 
-  private val cpuLabel = new Label("Gegner hat: " + controller.state.cpuHand.count + " Karten")
+  private val cpuLabel = new Label("Gegner hat: " + controller.cpuHandCount + " Karten")
   private val statusLabel = new Label("Willkommen bei Uno!")
-  private val colourLabel = new Label("Aktuelle Farbe: " + controller.state.activeColour)
+  private val colourLabel = new Label("Aktuelle Farbe: " + controller.activeColour)
 
   private var pilePanel: Component = new CardPanel(Color.GRAY, "Uno")
 
@@ -95,24 +96,24 @@ class SwingGui(controller: ControllerInterface) extends Frame with Observer {
   }
 
   override def update(): Unit = {
-    if (controller.state.playerHand.cards.isEmpty || controller.state.cpuHand.cards.isEmpty) {
-      handleGameOver(if (controller.state.playerHand.cards.isEmpty) "Du hast gewonnen!" else "Der Gegner hat gewonnen!")
+    if (!controller.isGameActive) {
+      handleGameOver(if (controller.playerHandCount == 0) "Du hast gewonnen!" else "Der Gegner hat gewonnen!")
     }
 
     statusLabel.text = controller.state.statusMessage
-    cpuLabel.text = "Gegner hat: " + controller.state.cpuHand.count + " Karten"
+    cpuLabel.text = "Gegner hat: " + controller.cpuHandCount + " Karten"
 
-    val pileCard = controller.state.pile
+    val pileCard = controller.pileCard
     pilePanel = new CardPanel(getColor(pileCard.colour.toString), getCardValueSymbol(pileCard.value))
 
-    val activeColorName = controller.state.activeColour.toString
+    val activeColorName = controller.activeColour.toString
     colourLabel.text = "Aktuelle Farbe: " + activeColorName
     colourLabel.foreground = getColor(activeColorName)
 
     updateCenterPanel()
 
     handPanel.contents.clear()
-    for (card <- controller.state.playerHand.cards) {
+    for (card <- controller.playerHandCards) {
       val btnColor = getColor(card.colour.toString)
 
       val buttonText = getCardValueSymbol(card.value)

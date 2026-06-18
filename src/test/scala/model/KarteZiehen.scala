@@ -20,6 +20,16 @@ class KarteZiehenSpec extends AnyWordSpec with Matchers {
       Draw.pileSize shouldBe 107 // 108 neu generiert - 1 gezogene Karte
     }
 
+    "draw from a non-empty pile without replenishing it" in {
+      val topCard = Card(Colour.Green, Number.seven)
+      Draw.setDeck(List(topCard))
+
+      val drawnCard = Draw.draw()
+
+      drawnCard shouldBe topCard
+      Draw.pileSize shouldBe 0
+    }
+
     "create a beginning hand of 7 cards" in {
       Draw.setDeck(DeckFactory.createStandardDeck())
       val hand = Draw.beginningHand(new Hand(List.empty))

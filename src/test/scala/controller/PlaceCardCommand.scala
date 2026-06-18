@@ -42,5 +42,15 @@ class PlaceCardCommandSpec extends AnyWordSpec with Matchers {
       // Bonus: Prüfen, ob der restliche Zustand auch wieder stimmt
       controller.state.pile should be(Card(Colour.Blue, Number.two))
     }
+
+    "not execute when the card cannot be played" in {
+      val invalidState = initialState.copy(activeColour = Colour.Red, pile = Card(Colour.Red, Number.two))
+      val invalidController = new UnoLogic(invalidState)
+      val invalidCommand = new PlaceCardCommand(invalidController, Card(Colour.Blue, Number.one), None)
+
+      invalidCommand.execute()
+
+      invalidController.state should be(invalidState)
+    }
   }
 }

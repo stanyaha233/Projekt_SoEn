@@ -78,6 +78,17 @@ class KarteSpec extends AnyFlatSpec with Matchers {
     GameState.unapply(state)
   }
 
+  it should "report game activity based on both hands" in {
+    val activeState = GameState(new Hand(List(Card(Colour.Red, Number.one))), new Hand(List(Card(Colour.Blue, Number.two))), Card(Colour.Red, Number.zero), Colour.Red, true)
+    activeState.isGameActive should be(true)
+
+    val playerEmpty = activeState.copy(playerHand = new Hand(Nil))
+    playerEmpty.isGameActive should be(false)
+
+    val cpuEmpty = activeState.copy(cpuHand = new Hand(Nil))
+    cpuEmpty.isGameActive should be(false)
+  }
+
   "Case Classes and Enums" should "have their generated methods covered" in {
     val card1 = Card(Colour.Red, Number.zero)
     val card2 = card1.copy(value = Number.one)

@@ -1,26 +1,20 @@
 package uno
 
 import uno.model._
-import uno.controller.{ControllerInterface, UnoLogic}
+import uno.controller.ControllerInterface
 import uno.aview.{UnoPlay, TuiInterface}
 import uno.gui.SwingGui
-import uno.util.GameFactory
 import javax.swing.UIManager
 import scala.io.StdIn
 
 object Main {
   def main(args: Array[String]): Unit = {
     UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName)
-    val initialState = GameFactory.createInitialState()
     
-    // 1. Controller über Interface kapseln
-    val controller: ControllerInterface = new UnoLogic(initialState)
-
-    // 2. TUI erstellen und nur das Interface zugänglich machen
-    val tui: TuiInterface = new UnoPlay(controller)
-
-    // 3. GUI erstellen
-    val gui = new SwingGui(controller)
+    val injector = com.google.inject.Guice.createInjector(new UnoModule)
+    val controller = injector.getInstance(classOf[ControllerInterface])
+    val tui = injector.getInstance(classOf[TuiInterface])
+    val gui = injector.getInstance(classOf[SwingGui])
 
     println("=== Willkommen zu UNO ===")
 
