@@ -2,7 +2,9 @@ package uno.controller
 
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
-import uno.model._
+import uno.controller.components.UnoLogic
+import uno.model.*
+import uno.model.components.GameState
 
 class PlaceCardCommandSpec extends AnyWordSpec with Matchers {
   "A PlaceCardCommand" should {

@@ -1,28 +1,14 @@
-package uno.controller
+package uno.controller.components
 
-import uno.controller.{DefaultStrategyService, FirstPossibleStrategy, StrategyService}
-import uno.model._
-import uno.util.Observable
 import com.google.inject.Inject
-import uno.util.UndoManager
-import uno.util.Command
-import scala.util.{Try, Success, Failure}
+import uno.controller.{ControllerInterface, PlaceCardCommand}
+import uno.model.{Card, Colour, Draw, GameStateInterface, Hand, Number, SortByColorStrategy, SortByValueStrategy}
+import uno.util.{Observable, UndoManager}
 
+import scala.util.{Failure, Success, Try}
 
-class UnoLogic @Inject() (
-    var state: GameState,
-    private val strategyService: StrategyService
-) extends ControllerInterface {
+class UnoLogic @Inject() (var state: GameStateInterface) extends ControllerInterface {
   private val undoManager = new UndoManager()
-
-  def this(state: GameState) = this(
-    state,
-    new DefaultStrategyService(
-      new FirstPossibleStrategy(),
-      new SortByColorStrategy(),
-      new SortByValueStrategy()
-    )
-  )
 
   override def playerHandCards: List[Card] = state.playerHand.cards
   override def playerHandCount: Int = state.playerHand.count
@@ -32,7 +18,9 @@ class UnoLogic @Inject() (
   override def isPlayerTurn: Boolean = state.isPlayerTurn
   override def isGameActive: Boolean = state.isGameActive
 
-  private def autoSort(hand: Hand): Hand = strategyService.sortHandByColor(hand)
+  private def autoSort(hand: Hand): Hand = {
+    new Hand(new SortByColorStrategy().sort(hand.cards))
+  }
 
   def canPlay(card: Card): Boolean = {
     card.colour == state.activeColour ||
@@ -42,7 +30,7 @@ class UnoLogic @Inject() (
 
   def executePlaceCard(card: Card, chosenColour: Option[Colour.Value] = None): Unit = {
     if (!canPlay(card)) {
-      state = state.copy(statusMessage = "Ungültiger Zug!")
+      state = state.update(statusMessage = "Ungültiger Zug!")
     } else {
       val newPlayerHand = new Hand(state.playerHand.cards.diff(List(card)))
       val nextColour = if (card.colour == Colour.Black) chosenColour.getOrElse(Colour.Red) else card.colour
@@ -54,7 +42,7 @@ class UnoLogic @Inject() (
         case _ => (state.cpuHand, false, "")
       }
 
-      state = state.copy(
+      state = state.update(
         playerHand = autoSort(newPlayerHand),
         cpuHand = newCpuHand,
         pile = card,
@@ -65,18 +53,12 @@ class UnoLogic @Inject() (
     }
   }
 
-
   def playCard(card: Card, chosenColour: Option[Colour.Value] = None): Unit = {
     if (canPlay(card)) {
       undoManager.executeCommand(new PlaceCardCommand(this, card, chosenColour))
-
-      if (!state.isPlayerTurn) {
-        cpuTurn()
-      } else {
-        notifyObservers()
-      }
+      if (!state.isPlayerTurn) cpuTurn() else notifyObservers()
     } else {
-      state = state.copy(statusMessage = "Ungültiger Zug!")
+      state = state.update(statusMessage = "Ungültiger Zug!")
       notifyObservers()
     }
   }
@@ -85,15 +67,21 @@ class UnoLogic @Inject() (
     undoManager.undo()
     notifyObservers()
   }
+  
+  def redo(): Unit = {
+    undoManager.redo()
+    notifyObservers()
+  }
 
   def cpuTurn(): Unit = {
-    strategyService.chooseCpuCard(state.cpuHand, state.activeColour, state.pile.value) match {
+    state.cpuHand.cards.find(c => canPlay(c)) match {
       case Some(card) =>
         val newCpuHand = new Hand(state.cpuHand.cards.filterNot(_ == card))
         var newPlayerHand = state.playerHand
         var nextTurnIsPlayer = true
         val cpuWish = newCpuHand.cards.headOption.map(_.colour).find(_ != Colour.Black).getOrElse(Colour.Red)
         val nextColour = if (card.colour == Colour.Black) cpuWish else card.colour
+
         card.value match {
           case Number.plus2 => for (_ <- 1 to 2) newPlayerHand = newPlayerHand.add(Draw.draw())
           case Number.plus4 => for (_ <- 1 to 4) newPlayerHand = newPlayerHand.add(Draw.draw())
@@ -101,7 +89,7 @@ class UnoLogic @Inject() (
           case _ => nextTurnIsPlayer = true
         }
 
-        state = state.copy(
+        state = state.update(
           cpuHand = newCpuHand,
           playerHand = autoSort(newPlayerHand),
           pile = card,
@@ -114,14 +102,12 @@ class UnoLogic @Inject() (
     }
   }
 
-
   def drawCard(): Unit = {
     val drawResult: Try[Card] = Try(Draw.draw())
-
     drawResult match {
       case Success(newCard) =>
         if (state.isPlayerTurn) {
-          state = state.copy(
+          state = state.update(
             playerHand = autoSort(state.playerHand.add(newCard)),
             isPlayerTurn = false,
             statusMessage = "Karte gezogen. Gegner ist am Zug."
@@ -129,7 +115,7 @@ class UnoLogic @Inject() (
           notifyObservers()
           cpuTurn()
         } else {
-          state = state.copy(
+          state = state.update(
             cpuHand = state.cpuHand.add(newCard),
             isPlayerTurn = true,
             statusMessage = "CPU hat gezogen."
@@ -137,26 +123,25 @@ class UnoLogic @Inject() (
           notifyObservers()
         }
       case Failure(_) =>
-        state = state.copy(statusMessage = "Stapel ist leer!")
+        state = state.update(statusMessage = "Stapel ist leer!")
         notifyObservers()
     }
   }
 
   def sortHandByColor(): Unit = {
-      val sortedHand = strategyService.sortHandByColor(state.playerHand)
-        state = state.copy(playerHand = sortedHand, statusMessage = "Karten wurden nach Farbe sortiert.")
-        notifyObservers()
+    val sortedCards = new SortByColorStrategy().sort(state.playerHand.cards)
+    state = state.update(playerHand = new Hand(sortedCards), statusMessage = "Karten wurden nach Farbe sortiert.")
+    notifyObservers()
   }
 
   def sortHandByValue(): Unit = {
-      val sortedHand = strategyService.sortHandByValue(state.playerHand)
-        state = state.copy(playerHand = sortedHand, statusMessage = "Karten wurden nach Zahl sortiert.")
-        notifyObservers()
-      }
+    val sortedCards = new SortByValueStrategy().sort(state.playerHand.cards)
+    state = state.update(playerHand = new Hand(sortedCards), statusMessage = "Karten wurden nach Zahl sortiert.")
+    notifyObservers()
+  }
 
   def setMessage(msg: String): Unit = {
-    state = state.copy(statusMessage = msg)
+    state = state.update(statusMessage = msg)
     notifyObservers()
   }
 }
-  

@@ -1,5 +1,8 @@
 package uno.model
 
+import uno.model.components.GameState
+import uno.model.{Card, Colour, Hand}
+
 trait GameStateInterface {
   def playerHand: Hand
   def cpuHand: Hand
@@ -8,6 +11,18 @@ trait GameStateInterface {
   def isPlayerTurn: Boolean
   def statusMessage: String
   def unoSaid: Boolean
-
   def isGameActive: Boolean = playerHand.count > 0 && cpuHand.count > 0
+  def karteZiehen(): GameStateInterface
+  def spielZugAusfuehren(card: Card): GameStateInterface
+  def kartenSortieren(): GameStateInterface
+  def copyState(): GameStateInterface
+
+  def update(
+              playerHand: Hand = null,
+              cpuHand: Hand = null,
+              pile: Card = null,
+              activeColour: Colour.Value = null,
+              isPlayerTurn: Boolean = false,
+              statusMessage: String = null
+            ): GameStateInterface
 }

@@ -51,6 +51,10 @@ class SwingGui @Inject() (controller: ControllerInterface) extends Frame with Ob
     reactions += { case ButtonClicked(_) => controller.undo() }
   }
 
+  private val redoButton = new Button("Redo") {
+    reactions += { case ButtonClicked(_) => controller.redo() }
+  }
+
   private val handPanel = new GridPanel(0, 4) { vGap = 5; hGap = 5 }
   private val centerPanel = new BoxPanel(Orientation.Vertical)
 
@@ -88,6 +92,8 @@ class SwingGui @Inject() (controller: ControllerInterface) extends Frame with Ob
       contents += drawButton
       undoButton.xLayoutAlignment = java.awt.Component.CENTER_ALIGNMENT
       contents += undoButton
+      redoButton.xLayoutAlignment = java.awt.Component.CENTER_ALIGNMENT
+      contents += redoButton
       contents += Swing.VGlue
     }
     centerPanel.contents += mainBox

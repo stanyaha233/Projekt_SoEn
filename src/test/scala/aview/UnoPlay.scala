@@ -2,8 +2,11 @@ package uno.aview
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import uno.model._
-import uno.controller.{ControllerInterface, UnoLogic}
+import uno.aview.components.TuiInterface
+import uno.model.*
+import uno.controller.ControllerInterface
+import uno.controller.components.UnoLogic
+import uno.model.components.GameState
 
 class UnoPlaySpec extends AnyFlatSpec with Matchers {
 

@@ -1,16 +1,14 @@
 package uno.aview
 
 import com.google.inject.Inject
-import scala.io.StdIn
-import uno.model._
-import uno.controller.ControllerInterface
+import uno.controller.*
+import uno.model.*
 import uno.util.Observer
 
-trait TuiInterface {
-  def processInputLine(input: String): Unit
-}
+import scala.io.StdIn
 
-class UnoPlay @Inject() (controller: ControllerInterface) extends Observer with TuiInterface {
+
+class UnoPlay @Inject() (controller: ControllerInterface) extends Observer{
 
   controller.add(this)
 
@@ -63,10 +61,11 @@ class UnoPlay @Inject() (controller: ControllerInterface) extends Observer with 
     }
   }
 
-  override def processInputLine(input: String): Unit = {
+  def processInputLine(input: String): Unit = {
     input match {
       case "undo" => controller.undo()
       case "draw" => controller.drawCard()
+      case "redo" => controller.redo()
       case _ => parseInput(input)
     }
   }

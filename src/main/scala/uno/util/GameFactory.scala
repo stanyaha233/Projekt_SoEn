@@ -1,6 +1,7 @@
 package uno.util
 
-import uno.model._
+import uno.model.*
+import uno.model.components.GameState
 
 object GameFactory {
   def createInitialState(): GameState = {

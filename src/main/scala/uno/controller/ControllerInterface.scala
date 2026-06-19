@@ -14,6 +14,7 @@ trait ControllerInterface extends Observable {
   def isGameActive: Boolean
   def playCard(card: Card, chosenColour: Option[Colour.Value] = None): Unit
   def undo(): Unit
+  def redo(): Unit
   def cpuTurn(): Unit
   def drawCard(): Unit
   def sortHandByColor(): Unit

@@ -2,7 +2,8 @@ package uno
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import uno.model._
+import uno.model.*
+import uno.model.components.GameState
 
 class KarteSpec extends AnyFlatSpec with Matchers {
 
