@@ -1,6 +1,6 @@
 package uno.controller
 
-import com.google.inject.name.Named
+import uno.controller.{DefaultStrategyService, FirstPossibleStrategy, StrategyService}
 import uno.model._
 import uno.util.Observable
 import com.google.inject.Inject
@@ -11,17 +11,17 @@ import scala.util.{Try, Success, Failure}
 
 class UnoLogic @Inject() (
     var state: GameState,
-    @Named("colorSorter") private val colorSorter: SortingStrategy,
-    @Named("valueSorter") private val valueSorter: SortingStrategy,
-    private val botStrategy: BotStrategy
+    private val strategyService: StrategyService
 ) extends ControllerInterface {
   private val undoManager = new UndoManager()
 
   def this(state: GameState) = this(
     state,
-    new SortByColorStrategy(),
-    new SortByValueStrategy(),
-    new FirstPossibleStrategy()
+    new DefaultStrategyService(
+      new FirstPossibleStrategy(),
+      new SortByColorStrategy(),
+      new SortByValueStrategy()
+    )
   )
 
   override def playerHandCards: List[Card] = state.playerHand.cards
@@ -32,9 +32,7 @@ class UnoLogic @Inject() (
   override def isPlayerTurn: Boolean = state.isPlayerTurn
   override def isGameActive: Boolean = state.isGameActive
 
-  private def autoSort(hand: Hand): Hand = {
-    new Hand(colorSorter.sort(hand.cards))
-  }
+  private def autoSort(hand: Hand): Hand = strategyService.sortHandByColor(hand)
 
   def canPlay(card: Card): Boolean = {
     card.colour == state.activeColour ||
@@ -89,7 +87,7 @@ class UnoLogic @Inject() (
   }
 
   def cpuTurn(): Unit = {
-    botStrategy.chooseCard(state.cpuHand, state.activeColour, state.pile.value) match {
+    strategyService.chooseCpuCard(state.cpuHand, state.activeColour, state.pile.value) match {
       case Some(card) =>
         val newCpuHand = new Hand(state.cpuHand.cards.filterNot(_ == card))
         var newPlayerHand = state.playerHand
@@ -145,15 +143,13 @@ class UnoLogic @Inject() (
   }
 
   def sortHandByColor(): Unit = {
-      val sortedCards = colorSorter.sort(state.playerHand.cards)
-        val sortedHand = new Hand(sortedCards)
+      val sortedHand = strategyService.sortHandByColor(state.playerHand)
         state = state.copy(playerHand = sortedHand, statusMessage = "Karten wurden nach Farbe sortiert.")
         notifyObservers()
   }
 
   def sortHandByValue(): Unit = {
-      val sortedCards = valueSorter.sort(state.playerHand.cards)
-        val sortedHand = new Hand(sortedCards)
+      val sortedHand = strategyService.sortHandByValue(state.playerHand)
         state = state.copy(playerHand = sortedHand, statusMessage = "Karten wurden nach Zahl sortiert.")
         notifyObservers()
       }

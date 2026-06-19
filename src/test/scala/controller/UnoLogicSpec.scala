@@ -179,6 +179,18 @@ class UnoLogicSpec extends AnyFlatSpec with Matchers {
     logicColour.cpuTurn()
     logicColour.state.pile should be(Card(Colour.Red, Number.five))
     logicColour.state.activeColour should be(Colour.Red)
+
+    val cpuColourFallbackState = GameState(
+      new Hand(Nil),
+      new Hand(List(Card(Colour.Green, Number.one), Card(Colour.Red, Number.five))),
+      Card(Colour.Red, Number.zero),
+      Colour.Red,
+      false
+    )
+    val logicColourFallback = new UnoLogic(cpuColourFallbackState)
+    logicColourFallback.cpuTurn()
+    logicColourFallback.state.pile should be(Card(Colour.Red, Number.five))
+    logicColourFallback.state.activeColour should be(Colour.Red)
   }
 
   it should "handle cpuWish logic branches" in {
