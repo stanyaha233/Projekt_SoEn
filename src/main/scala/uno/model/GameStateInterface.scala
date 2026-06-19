@@ -1,7 +1,7 @@
 package uno.model
 
 import uno.model.components.GameState
-import uno.model.{Card, Colour, Hand}
+import uno.model.*
 
 trait GameStateInterface {
   def playerHand: Hand
