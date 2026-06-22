@@ -1,5 +1,6 @@
 package uno.aview
 
+// $COVERAGE-OFF$
 import com.google.inject.Inject
 import uno.controller.*
 import uno.model.*
@@ -70,3 +71,4 @@ class UnoPlay @Inject() (controller: ControllerInterface) extends Observer{
     }
   }
 }
+// $COVERAGE-ON$

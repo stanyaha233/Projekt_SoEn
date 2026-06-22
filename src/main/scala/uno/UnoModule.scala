@@ -7,11 +7,25 @@ import uno.model.GameStateInterface
 import uno.model.components.GameState
 import uno.model.*
 import uno.aview.*
+import uno.util.*
 
 class UnoModule extends AbstractModule {
   override def configure(): Unit = {
     bind(classOf[ControllerInterface]).to(classOf[UnoLogic])
     bind(classOf[GameStateInterface]).to(classOf[GameState])
+  }
+
+  @Provides
+  def provideFileIO(): FileIO = {
+    sys.props.get("uno.fileio").map(_.trim.toLowerCase) match {
+      case Some("xml")  => new FileIOXml
+      case Some("json") => new FileIOJson
+      case Some(other)   =>
+        throw new IllegalArgumentException(
+          s"Unknown file IO implementation '$other'. Use 'xml' or 'json'."
+        )
+      case None => new FileIOJson
+    }
   }
 
   @Provides

@@ -252,12 +252,25 @@ class UnoLogicSpec extends AnyFlatSpec with Matchers {
     logic.state.statusMessage should be("Karten wurden nach Zahl sortiert.")
   }
 
-  it should "handle undo" in {
+  it should "handle undo and redo" in {
     val state = GameState(new Hand(Nil), new Hand(Nil), Card(Colour.Blue, Number.two), Colour.Blue, true)
     val logic = new UnoLogic(state)
     logic.undo()
     // Undo on empty stack should just notify observers but not crash
     logic.state should be(state)
+    logic.redo()
+    logic.state should be(state)
+  }
+
+  it should "handle undo and redo with actual commands" in {
+    val state = GameState(new Hand(List(Card(Colour.Red, Number.five))), new Hand(Nil), Card(Colour.Red, Number.zero), Colour.Red, true)
+    val logic = new UnoLogic(state)
+    logic.playCard(Card(Colour.Red, Number.five))
+    logic.state.playerHand.count should be(0)
+    logic.undo()
+    logic.state.playerHand.count should be(1)
+    logic.redo()
+    logic.state.playerHand.count should be(0)
   }
 
   it should "handle drawCard failure when pile throws exception safely" in {
@@ -291,5 +304,31 @@ class UnoLogicSpec extends AnyFlatSpec with Matchers {
     blackStrategy.chooseCard(handWithBlack, Colour.Blue, Number.one) should be(Some(Card(Colour.Black, Number.choice)))
     blackStrategy.chooseCard(hand1, Colour.Blue, Number.one) should be(Some(Card(Colour.Blue, Number.two)))
     blackStrategy.chooseCard(hand1, Colour.Red, Number.five) should be(None)
+  }
+
+  it should "invoke default arguments on ControllerInterface" in {
+    class MockController extends ControllerInterface {
+      override def state: GameStateInterface = null
+      override def playerHandCards: List[Card] = null
+      override def playerHandCount: Int = 0
+      override def cpuHandCount: Int = 0
+      override def pileCard: Card = null
+      override def activeColour: Colour.Value = null
+      override def isPlayerTurn: Boolean = false
+      override def isGameActive: Boolean = false
+      override def playCard(card: Card, chosenColour: Option[Colour.Value]): Unit = {}
+      override def undo(): Unit = {}
+      override def redo(): Unit = {}
+      override def cpuTurn(): Unit = {}
+      override def drawCard(): Unit = {}
+      override def sortHandByColor(): Unit = {}
+      override def sortHandByValue(): Unit = {}
+      override def setMessage(msg: String): Unit = {}
+    }
+
+    val mock = new MockController
+    val method = classOf[ControllerInterface].getMethod("playCard$default$2")
+    val defaultVal = method.invoke(mock).asInstanceOf[Option[Colour.Value]]
+    defaultVal should be(None)
   }
 }

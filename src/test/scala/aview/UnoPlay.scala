@@ -2,7 +2,6 @@ package uno.aview
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import uno.aview.components.TuiInterface
 import uno.model.*
 import uno.controller.ControllerInterface
 import uno.controller.components.UnoLogic
@@ -21,7 +20,7 @@ class UnoPlaySpec extends AnyFlatSpec with Matchers {
       isPlayerTurn = true
     )
     val controller: ControllerInterface = new UnoLogic(state)
-    val tui: TuiInterface = new UnoPlay(controller)
+    val tui = new UnoPlay(controller)
 
     tui.processInputLine("red five")
     controller.state.playerHand.count should be(1)
@@ -32,7 +31,7 @@ class UnoPlaySpec extends AnyFlatSpec with Matchers {
     val extraCard = Card(Colour.Blue, Number.one)
     val state = GameState(new Hand(List(extraCard)), new Hand(List(extraCard)), Card(Colour.Red, Number.zero), Colour.Red, true)
     val controller: ControllerInterface = new UnoLogic(state)
-    val tui: TuiInterface = new UnoPlay(controller)
+    val tui = new UnoPlay(controller)
     
     tui.processInputLine("hallo welt")
     controller.state.statusMessage should include("Eingabe falsch")
@@ -42,7 +41,7 @@ class UnoPlaySpec extends AnyFlatSpec with Matchers {
     val extraCard = Card(Colour.Blue, Number.one)
     val state = GameState(new Hand(List(extraCard)), new Hand(List(extraCard)), Card(Colour.Red, Number.zero), Colour.Red, true)
     val controller: ControllerInterface = new UnoLogic(state)
-    val tui: TuiInterface = new UnoPlay(controller)
+    val tui = new UnoPlay(controller)
     
     tui.processInputLine("red")
     controller.state.statusMessage should include("Eingabe falsch")
@@ -58,7 +57,7 @@ class UnoPlaySpec extends AnyFlatSpec with Matchers {
       isPlayerTurn = true
     )
     val controller: ControllerInterface = new UnoLogic(state)
-    val tui: TuiInterface = new UnoPlay(controller)
+    val tui = new UnoPlay(controller)
     
     tui.processInputLine("red seven")
     controller.state.statusMessage should be("Diese Karte hast du nicht!")
@@ -75,7 +74,7 @@ class UnoPlaySpec extends AnyFlatSpec with Matchers {
       isPlayerTurn = true
     )
     val controller: ControllerInterface = new UnoLogic(state)
-    val tui: TuiInterface = new UnoPlay(controller)
+    val tui = new UnoPlay(controller)
     
     val in = new java.io.ByteArrayInputStream("blue\n".getBytes)
     val originalIn = System.in
@@ -101,7 +100,7 @@ class UnoPlaySpec extends AnyFlatSpec with Matchers {
       isPlayerTurn = true
     )
     val controller: ControllerInterface = new UnoLogic(state)
-    val tui: TuiInterface = new UnoPlay(controller)
+    val tui = new UnoPlay(controller)
     
     tui.processInputLine("red five")
     controller.state.playerHand.count should be(0)
@@ -116,7 +115,7 @@ class UnoPlaySpec extends AnyFlatSpec with Matchers {
       isPlayerTurn = true
     )
     val controller: ControllerInterface = new UnoLogic(state)
-    val tui: TuiInterface = new UnoPlay(controller)
+    val tui = new UnoPlay(controller)
     
     tui.processInputLine("draw")
     // Nachdem der Spieler zieht, legt die CPU ihre Red 1 und gewinnt.

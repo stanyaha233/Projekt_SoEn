@@ -18,6 +18,7 @@ class KarteZiehenSpec extends AnyWordSpec with Matchers {
       Draw.setDeck(List.empty)
       val card = Draw.draw()
       Draw.pileSize shouldBe 107 // 108 neu generiert - 1 gezogene Karte
+      Draw.getDeck.length shouldBe 107
     }
 
     "draw from a non-empty pile without replenishing it" in {

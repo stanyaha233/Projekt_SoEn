@@ -1,5 +1,6 @@
 package uno
 
+// $COVERAGE-OFF$
 import uno.model._
 import uno.aview.*
 import uno.controller.ControllerInterface
@@ -33,3 +34,4 @@ object Main {
     }
   }
 }
+// $COVERAGE-ON$

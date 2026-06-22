@@ -12,6 +12,7 @@ class UndoManagerSpec extends AnyWordSpec with Matchers {
       val command = new Command {
         override def execute(): Unit = value = "changed"
         override def undo(): Unit = value = "initial"
+        override def redo(): Unit = value = "changed"
       }
 
       undoManager.executeCommand(command)
