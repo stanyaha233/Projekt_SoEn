@@ -90,6 +90,36 @@ class KarteSpec extends AnyFlatSpec with Matchers {
     cpuEmpty.isGameActive should be(false)
   }
 
+  it should "support update with default parameters via GameStateInterface" in {
+    val state: GameStateInterface = GameState(new Hand(Nil), new Hand(Nil), Card(Colour.Red, Number.zero), Colour.Red, true, "Custom message")
+    val updated = state.update()
+    updated should not be null
+    updated.statusMessage should be("Custom message")
+  }
+
+  it should "support drawing a card directly" in {
+    val state = GameState(new Hand(Nil), new Hand(Nil), Card(Colour.Red, Number.zero), Colour.Red, true)
+    val afterDraw = state.karteZiehen()
+    afterDraw.playerHand.count should be(1)
+  }
+
+  it should "support executing a play directly" in {
+    val card = Card(Colour.Blue, Number.five)
+    val state = GameState(new Hand(List(card)), new Hand(Nil), Card(Colour.Red, Number.zero), Colour.Red, true)
+    val afterPlay = state.spielZugAusfuehren(card)
+    afterPlay.playerHand.count should be(0)
+    afterPlay.pile should be(card)
+    afterPlay.activeColour should be(Colour.Blue)
+  }
+
+  it should "support sorting cards directly" in {
+    val card1 = Card(Colour.Blue, Number.five)
+    val card2 = Card(Colour.Red, Number.zero)
+    val state = GameState(new Hand(List(card1, card2)), new Hand(Nil), Card(Colour.Red, Number.zero), Colour.Red, true)
+    val afterSort = state.kartenSortieren()
+    afterSort.playerHand.cards should be(List(card2, card1))
+  }
+
   "Case Classes and Enums" should "have their generated methods covered" in {
     val card1 = Card(Colour.Red, Number.zero)
     val card2 = card1.copy(value = Number.one)

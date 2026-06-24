@@ -1,5 +1,6 @@
 package uno.gui
 
+// $COVERAGE-OFF$
 import com.google.inject.Inject
 import scala.swing._
 import scala.swing.event._
@@ -160,3 +161,4 @@ class SwingGui @Inject() (controller: ControllerInterface) extends Frame with Ob
   controller.sortHandByColor()
   visible = true
 }
+// $COVERAGE-ON$

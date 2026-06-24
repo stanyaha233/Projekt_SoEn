@@ -43,6 +43,11 @@ class PlaceCardCommandSpec extends AnyWordSpec with Matchers {
 
       // Bonus: Prüfen, ob der restliche Zustand auch wieder stimmt
       controller.state.pile should be(Card(Colour.Blue, Number.two))
+
+      // 4. Redo ausführen
+      controller.redo()
+      controller.state.playerHand.cards should not contain cardToPlay
+      controller.state.pile should be(cardToPlay)
     }
 
     "not execute when the card cannot be played" in {
