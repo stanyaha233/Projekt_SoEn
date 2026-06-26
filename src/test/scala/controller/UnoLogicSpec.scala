@@ -287,6 +287,15 @@ class UnoLogicSpec extends AnyFlatSpec with Matchers {
     }
   }
 
+  it should "restart the game state correctly" in {
+    val state = GameState(new Hand(Nil), new Hand(Nil), Card(Colour.Blue, Number.two), Colour.Blue, true)
+    val logic = new UnoLogic(state)
+    logic.restart()
+    logic.state.playerHand.count should be(7)
+    logic.state.cpuHand.count should be(7)
+    logic.state.isPlayerTurn should be(true)
+  }
+
   "Hand.sortCards" should "sort cards using given strategies directly on the hand" in {
     val hand = new Hand(List(Card(Colour.Blue, Number.two), Card(Colour.Red, Number.one)))
     val sortedHand = hand.sortCards(new SortByColorStrategy())
@@ -327,6 +336,7 @@ class UnoLogicSpec extends AnyFlatSpec with Matchers {
       override def setMessage(msg: String): Unit = {}
       override def save(): Unit = {}
       override def load(): Unit = {}
+      override def restart(): Unit = {}
     }
 
     val mock = new MockController

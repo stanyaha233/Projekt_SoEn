@@ -1,9 +1,0 @@
-{
-  "unoSaid" : "false",
-  "isPlayerTurn" : "true",
-  "pile" : "Yellow:six",
-  "activeColour" : "Yellow",
-  "playerHand" : "Red:plus2,Red:skip,Green:two,Yellow:three,Black:plus4,Black:choice",
-  "statusMessage" : "CPU hat gezogen.",
-  "cpuHand" : "Green:directionchange,Blue:two,Green:eight,Green:zero,Red:seven,Blue:four,Red:five,Blue:six"
-}

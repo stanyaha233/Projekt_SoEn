@@ -2,23 +2,37 @@ package uno.controller.components
 
 import com.google.inject.Inject
 import uno.controller.*
-import uno.model.{Card, Colour, Draw, GameStateInterface, Hand, Number, SortByColorStrategy, SortByValueStrategy}
+import uno.model.{
+  Card,
+  Colour,
+  Draw,
+  GameStateInterface,
+  Hand,
+  Number,
+  SortByColorStrategy,
+  SortByValueStrategy
+}
 import uno.util.{Observable, UndoManager, FileIO, FileIOJson}
 import uno.model.components.GameState
 import uno.model.ScoreVisitor
 
 import scala.util.{Failure, Success, Try}
 
-class UnoLogic @Inject() (var state: GameStateInterface, val fileIO: FileIO) extends ControllerInterface {
+class UnoLogic @Inject() (var state: GameStateInterface, val fileIO: FileIO)
+    extends ControllerInterface {
   def this(state: GameStateInterface) = this(state, new FileIOJson)
   private val undoManager = new UndoManager()
-  var turnState: TurnState = if (state.isPlayerTurn) PlayerTurnState else CpuTurnState
+  var turnState: TurnState =
+    if (state.isPlayerTurn) PlayerTurnState else CpuTurnState
 
   def syncTurnState(): Unit = {
     turnState = if (state.isPlayerTurn) PlayerTurnState else CpuTurnState
   }
 
-  def executePlaceCardCommand(card: Card, chosenColour: Option[Colour.Value]): Unit = {
+  def executePlaceCardCommand(
+      card: Card,
+      chosenColour: Option[Colour.Value]
+  ): Unit = {
     undoManager.executeCommand(new PlaceCardCommand(this, card, chosenColour))
   }
 
@@ -36,21 +50,41 @@ class UnoLogic @Inject() (var state: GameStateInterface, val fileIO: FileIO) ext
 
   def canPlay(card: Card): Boolean = {
     card.colour == state.activeColour ||
-      card.value == state.pile.value ||
-      card.colour == Colour.Black
+    card.value == state.pile.value ||
+    card.colour == Colour.Black
   }
 
-  def executePlaceCard(card: Card, chosenColour: Option[Colour.Value] = None): Unit = {
+  def executePlaceCard(
+      card: Card,
+      chosenColour: Option[Colour.Value] = None
+  ): Unit = {
     if (!canPlay(card)) {
       state = state.update(statusMessage = "Ungültiger Zug!")
     } else {
       val newPlayerHand = new Hand(state.playerHand.cards.diff(List(card)))
-      val nextColour = if (card.colour == Colour.Black) chosenColour.getOrElse(Colour.Red) else card.colour
+      val nextColour =
+        if (card.colour == Colour.Black) chosenColour.getOrElse(Colour.Red)
+        else card.colour
 
       val (newCpuHand, nextTurnIsPlayer, msgSuffix) = card.value match {
-        case Number.plus2 => (state.cpuHand.add(Draw.draw()).add(Draw.draw()), false, ". CPU zieht 2!")
-        case Number.plus4 => (state.cpuHand.add(Draw.draw()).add(Draw.draw()).add(Draw.draw()).add(Draw.draw()), false, ". CPU zieht 4!")
-        case Number.skip | Number.directionchange => (state.cpuHand, true, ". Du bist nochmal dran!")
+        case Number.plus2 =>
+          (
+            state.cpuHand.add(Draw.draw()).add(Draw.draw()),
+            false,
+            ". CPU zieht 2!"
+          )
+        case Number.plus4 =>
+          (
+            state.cpuHand
+              .add(Draw.draw())
+              .add(Draw.draw())
+              .add(Draw.draw())
+              .add(Draw.draw()),
+            false,
+            ". CPU zieht 4!"
+          )
+        case Number.skip | Number.directionchange =>
+          (state.cpuHand, true, ". Du bist nochmal dran!")
         case _ => (state.cpuHand, false, "")
       }
 
@@ -74,7 +108,7 @@ class UnoLogic @Inject() (var state: GameStateInterface, val fileIO: FileIO) ext
     syncTurnState()
     notifyObservers()
   }
-  
+
   def redo(): Unit = {
     undoManager.redo()
     syncTurnState()
@@ -91,13 +125,19 @@ class UnoLogic @Inject() (var state: GameStateInterface, val fileIO: FileIO) ext
 
   def sortHandByColor(): Unit = {
     val sortedCards = new SortByColorStrategy().sort(state.playerHand.cards)
-    state = state.update(playerHand = new Hand(sortedCards), statusMessage = "Karten wurden nach Farbe sortiert.")
+    state = state.update(
+      playerHand = new Hand(sortedCards),
+      statusMessage = "Karten wurden nach Farbe sortiert."
+    )
     notifyObservers()
   }
 
   def sortHandByValue(): Unit = {
     val sortedCards = new SortByValueStrategy().sort(state.playerHand.cards)
-    state = state.update(playerHand = new Hand(sortedCards), statusMessage = "Karten wurden nach Zahl sortiert.")
+    state = state.update(
+      playerHand = new Hand(sortedCards),
+      statusMessage = "Karten wurden nach Zahl sortiert."
+    )
     notifyObservers()
   }
 
@@ -107,7 +147,8 @@ class UnoLogic @Inject() (var state: GameStateInterface, val fileIO: FileIO) ext
   }
 
   override def save(): Unit = {
-    val extension = sys.props.get("uno.fileio").map(_.trim.toLowerCase).getOrElse("json")
+    val extension =
+      sys.props.get("uno.fileio").map(_.trim.toLowerCase).getOrElse("json")
     val filename = s"savegame.$extension"
 
     val data = Map(
@@ -116,16 +157,22 @@ class UnoLogic @Inject() (var state: GameStateInterface, val fileIO: FileIO) ext
       "statusMessage" -> state.statusMessage,
       "unoSaid" -> state.unoSaid.toString,
       "pile" -> s"${state.pile.colour}:${state.pile.value}",
-      "playerHand" -> state.playerHand.cards.map(c => s"${c.colour}:${c.value}").mkString(","),
-      "cpuHand" -> state.cpuHand.cards.map(c => s"${c.colour}:${c.value}").mkString(",")
+      "playerHand" -> state.playerHand.cards
+        .map(c => s"${c.colour}:${c.value}")
+        .mkString(","),
+      "cpuHand" -> state.cpuHand.cards
+        .map(c => s"${c.colour}:${c.value}")
+        .mkString(",")
     )
     fileIO.save(data, filename)
-    state = state.update(statusMessage = s"Spielstand gespeichert in $filename!")
+    state =
+      state.update(statusMessage = s"Spielstand gespeichert in $filename!")
     notifyObservers()
   }
 
   override def load(): Unit = {
-    val extension = sys.props.get("uno.fileio").map(_.trim.toLowerCase).getOrElse("json")
+    val extension =
+      sys.props.get("uno.fileio").map(_.trim.toLowerCase).getOrElse("json")
     val filename = s"savegame.$extension"
 
     try {
@@ -137,18 +184,21 @@ class UnoLogic @Inject() (var state: GameStateInterface, val fileIO: FileIO) ext
       }
 
       val playerHandCards = data.get("playerHand") match {
-        case Some(str) if str.trim.nonEmpty => str.split(",").map(parseCard).toList
+        case Some(str) if str.trim.nonEmpty =>
+          str.split(",").map(parseCard).toList
         case _ => Nil
       }
       val cpuHandCards = data.get("cpuHand") match {
-        case Some(str) if str.trim.nonEmpty => str.split(",").map(parseCard).toList
+        case Some(str) if str.trim.nonEmpty =>
+          str.split(",").map(parseCard).toList
         case _ => Nil
       }
 
       val loadedPile = parseCard(data("pile"))
       val loadedActiveColour = Colour.withName(data("activeColour"))
       val loadedIsPlayerTurn = data("isPlayerTurn").toBoolean
-      val loadedStatusMessage = data.getOrElse("statusMessage", "Spiel geladen!")
+      val loadedStatusMessage =
+        data.getOrElse("statusMessage", "Spiel geladen!")
       val loadedUnoSaid = data.getOrElse("unoSaid", "false").toBoolean
 
       state = GameState(
@@ -164,7 +214,9 @@ class UnoLogic @Inject() (var state: GameStateInterface, val fileIO: FileIO) ext
       notifyObservers()
     } catch {
       case e: Exception =>
-        state = state.update(statusMessage = s"Fehler beim Laden von $filename: ${e.getMessage}")
+        state = state.update(statusMessage =
+          s"Fehler beim Laden von $filename: ${e.getMessage}"
+        )
         notifyObservers()
     }
   }
@@ -176,4 +228,15 @@ class UnoLogic @Inject() (var state: GameStateInterface, val fileIO: FileIO) ext
   }
 
   override def cpuHandCards: List[Card] = state.cpuHand.cards
+
+  override def restart(): Unit = {
+    val initialState: GameStateInterface =
+      uno.util.GameFactory.createInitialState()
+    state = initialState.update(
+      statusMessage = "Spiel neu gestartet!",
+      isPlayerTurn = initialState.isPlayerTurn
+    )
+    syncTurnState()
+    notifyObservers()
+  }
 }

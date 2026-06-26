@@ -23,4 +23,5 @@ trait ControllerInterface extends Observable {
   def setMessage(msg: String): Unit
   def save(): Unit
   def load(): Unit
+  def restart(): Unit
 }
