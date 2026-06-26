@@ -7,6 +7,7 @@ import uno.controller.ControllerInterface
 import uno.util.Observer
 import uno.model._
 import java.awt.Color
+import uno.model.ScoreVisitor
 
 private[gui] class CardPanel(color: Color, valueText: String)
     extends Component {
@@ -44,6 +45,7 @@ class SwingGui @Inject() (controller: ControllerInterface)
     "Gegner hat: " + controller.cpuHandCount + " Karten"
   )
   private val statusLabel = new Label("Willkommen bei Uno!")
+  private val scoreLabel = new Label("Deine Punkte: 0 | Gegner Punkte: 0")
   private val colourLabel = new Label(
     "Aktuelle Farbe: " + controller.activeColour
   )
@@ -78,6 +80,7 @@ class SwingGui @Inject() (controller: ControllerInterface)
       new BoxPanel(Orientation.Vertical) {
         contents += cpuLabel
         contents += statusLabel
+        contents += scoreLabel
       },
       BorderPanel.Position.North
     )
@@ -149,10 +152,18 @@ class SwingGui @Inject() (controller: ControllerInterface)
 
   override def update(): Unit = {
     if (!controller.isGameActive) {
-      handleGameOver(
-        if (controller.playerHandCount == 0) "Du hast gewonnen!"
-        else "Der Gegner hat gewonnen!"
-      )
+      // Visitor-Instanzen erstellen
+      val playerVisitor = new ScoreVisitor()
+      val cpuVisitor = new ScoreVisitor()
+
+      // Karten berechnen
+      controller.playerHandCards.foreach(_.accept(playerVisitor))
+      controller.cpuHandCards.foreach(_.accept(cpuVisitor))
+
+      val winMsg = if (controller.playerHandCount == 0) "Du hast gewonnen!" else "Der Gegner hat gewonnen!"
+      val scoreMsg = s"\n\nDein Score: ${playerVisitor.score} Punkte\nGegner Score: ${cpuVisitor.score} Punkte"
+
+      handleGameOver(winMsg + scoreMsg)
     }
 
     statusLabel.text = controller.state.statusMessage
