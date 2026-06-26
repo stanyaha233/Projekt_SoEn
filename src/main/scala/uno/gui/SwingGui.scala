@@ -221,7 +221,19 @@ class SwingGui @Inject() (controller: ControllerInterface)
     }
 
   private def handleGameOver(msg: String): Unit = {
-    Dialog.showMessage(this, msg, "Spiel vorbei"); this.dispose()
+    val options = List("Neustart", "Beenden")
+    val selection = Dialog.showOptions(
+      parent = this,
+      message = msg + "\n\nWas möchtest du tun?",
+      title = "Spiel vorbei",
+      messageType = Dialog.Message.Question,
+      entries = options,
+      initial = 0
+    )
+    selection match {
+      case Dialog.Result.Yes => controller.restart()
+      case _                 => this.dispose()
+    }
   }
   private def handleCardClick(card: Card): Unit = {
     if (card.colour == Colour.Black)
