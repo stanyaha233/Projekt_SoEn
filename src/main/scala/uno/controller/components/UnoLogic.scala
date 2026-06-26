@@ -5,6 +5,7 @@ import uno.controller.*
 import uno.model.{Card, Colour, Draw, GameStateInterface, Hand, Number, SortByColorStrategy, SortByValueStrategy}
 import uno.util.{Observable, UndoManager, FileIO, FileIOJson}
 import uno.model.components.GameState
+import uno.model.ScoreVisitor
 
 import scala.util.{Failure, Success, Try}
 
@@ -167,4 +168,12 @@ class UnoLogic @Inject() (var state: GameStateInterface, val fileIO: FileIO) ext
         notifyObservers()
     }
   }
+
+  def calculateHandScore(hand: Hand): Int = {
+    val visitor = new ScoreVisitor()
+    hand.cards.foreach(_.accept(visitor))
+    visitor.score
+  }
+
+  override def cpuHandCards: List[Card] = state.cpuHand.cards
 }

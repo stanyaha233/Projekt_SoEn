@@ -6,6 +6,7 @@ import uno.util.Observable
 trait ControllerInterface extends Observable {
   def state: GameStateInterface
   def playerHandCards: List[Card]
+  def cpuHandCards: List[Card]
   def playerHandCount: Int
   def cpuHandCount: Int
   def pileCard: Card

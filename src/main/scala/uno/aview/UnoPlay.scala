@@ -31,10 +31,18 @@ class UnoPlay @Inject() (controller: ControllerInterface) extends Observer {
         }
       }
     } else {
+      val playerVisitor = new ScoreVisitor()
+      val cpuVisitor = new ScoreVisitor()
+
+      controller.playerHandCards.foreach(_.accept(playerVisitor))
+      
       if (controller.playerHandCount == 0)
         println("GLÜCKWUNSCH! Du hast gewonnen!")
       else if (controller.cpuHandCount == 0)
         println("SCHADE! Der Gegner hat gewonnen!")
+
+      println(s"Dein Endstand: ${playerVisitor.score} Punkte")
+      println(s"Gegner Score: ${cpuVisitor.score} Punkte")
     }
   }
 
