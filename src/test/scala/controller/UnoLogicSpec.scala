@@ -5,6 +5,7 @@ import org.scalatest.matchers.should.Matchers
 import uno.controller.components.UnoLogic
 import uno.model.*
 import uno.model.components.GameState
+import uno.util.FileIOJson
 
 class UnoLogicSpec extends AnyFlatSpec with Matchers {
 
@@ -324,11 +325,41 @@ class UnoLogicSpec extends AnyFlatSpec with Matchers {
       override def sortHandByColor(): Unit = {}
       override def sortHandByValue(): Unit = {}
       override def setMessage(msg: String): Unit = {}
+      override def save(): Unit = {}
+      override def load(): Unit = {}
     }
 
     val mock = new MockController
     val method = classOf[ControllerInterface].getMethod("playCard$default$2")
     val defaultVal = method.invoke(mock).asInstanceOf[Option[Colour.Value]]
     defaultVal should be(None)
+  }
+
+  it should "save and load the game state correctly" in {
+    val fileIO = new FileIOJson
+    val state = GameState(
+      playerHand = Hand(List(Card(Colour.Red, Number.five))),
+      cpuHand = Hand(List(Card(Colour.Blue, Number.nine))),
+      pile = Card(Colour.Red, Number.zero),
+      activeColour = Colour.Red,
+      isPlayerTurn = true,
+      statusMessage = "Test state",
+      unoSaid = false
+    )
+    val logic = new UnoLogic(state, fileIO)
+    logic.save()
+
+    val logicLoad = new UnoLogic(GameState(Hand(Nil), Hand(Nil), Card(Colour.Blue, Number.seven), Colour.Blue, false), fileIO)
+    logicLoad.load()
+
+    logicLoad.state.playerHand.cards should be(List(Card(Colour.Red, Number.five)))
+    logicLoad.state.cpuHand.cards should be(List(Card(Colour.Blue, Number.nine)))
+    logicLoad.state.pile should be(Card(Colour.Red, Number.zero))
+    logicLoad.state.activeColour should be(Colour.Red)
+    logicLoad.state.isPlayerTurn should be(true)
+
+    // Clean up
+    val filename = s"savegame.${sys.props.getOrElse("uno.fileio", "json")}"
+    new java.io.File(filename).delete()
   }
 }

@@ -20,4 +20,6 @@ trait ControllerInterface extends Observable {
   def sortHandByColor(): Unit
   def sortHandByValue(): Unit
   def setMessage(msg: String): Unit
+  def save(): Unit
+  def load(): Unit
 }

@@ -1,0 +1,9 @@
+{
+  "unoSaid" : "false",
+  "isPlayerTurn" : "true",
+  "pile" : "Red:zero",
+  "activeColour" : "Red",
+  "playerHand" : "Red:five",
+  "statusMessage" : "Test state",
+  "cpuHand" : "Blue:nine"
+}
