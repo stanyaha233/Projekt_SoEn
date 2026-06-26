@@ -9,7 +9,7 @@ import uno.model.components.GameState
 class PlaceCardCommandSpec extends AnyWordSpec with Matchers {
   "A PlaceCardCommand" should {
 
-    // Test-Zustand
+    // Test-Zustand: Wir wählen Farbe Blau, um zum pile zu passen
     val initialState = GameState(
       playerHand = Hand(List(Card(Colour.Blue, Number.one))),
       cpuHand = Hand(List()),
