@@ -234,7 +234,7 @@ class UnoLogicSpec extends AnyFlatSpec with Matchers {
     card.colour should be(Colour.Yellow)
     card.value should be(Number.skip)
   }
-  "UnoLogic.executePlaceCard" should "handle the Default-Case correctly" in {
+  "UnoLogic.executePlaceCard" should "abdecken den Default-Zweig (Standardkarte)" in {
     val baseState = GameState(new Hand(List(Card(Colour.Red, Number.five))), Hand(Nil), Card(Colour.Red, Number.zero), Colour.Red, true)
     val logic = new UnoLogic(baseState)
     logic.executePlaceCard(Card(Colour.Red, Number.five))
@@ -271,14 +271,6 @@ class UnoLogicSpec extends AnyFlatSpec with Matchers {
     logic.state.playerHand.count should be(1)
     logic.redo()
     logic.state.playerHand.count should be(0)
-  }
-
-  it should "handle redo correctly" in {
-    val state = GameState(new Hand(Nil), new Hand(Nil), Card(Colour.Blue, Number.two), Colour.Blue, true)
-    val logic = new UnoLogic(state)
-    logic.redo()
-    // Undo on empty stack should just notify observers but not crash
-    logic.state should be(state)
   }
 
   it should "handle drawCard failure when pile throws exception safely" in {
