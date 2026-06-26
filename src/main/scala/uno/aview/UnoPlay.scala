@@ -2,9 +2,9 @@ package uno.aview
 
 // $COVERAGE-OFF$
 import com.google.inject.Inject
+import uno.controller.*
 import uno.model.*
 import uno.util.Observer
-import uno.controller.*
 
 import scala.io.StdIn
 
