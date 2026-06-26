@@ -528,6 +528,7 @@ class UnoLogicSpec extends AnyFlatSpec with Matchers {
       override def redo(): Unit = {}
       override def cpuTurn(): Unit = {}
       override def drawCard(): Unit = {}
+      override def sayUno(): Unit = {}
       override def sortHandByColor(): Unit = {}
       override def sortHandByValue(): Unit = {}
       override def setMessage(msg: String): Unit = {}
@@ -690,4 +691,71 @@ class UnoLogicSpec extends AnyFlatSpec with Matchers {
     sys.props.remove("uno.fileio")
     new java.io.File("savegame.xml").delete()
   }
+
+  it should "update the unoSaid status correctly when sayUno is called" in {
+    val state = GameState(
+      playerHand = Hand(List(Card(Colour.Red, Number.five), Card(Colour.Blue, Number.two))),
+      cpuHand = Hand(List(Card(Colour.Blue, Number.nine))),
+      pile = Card(Colour.Red, Number.zero),
+      activeColour = Colour.Red,
+      isPlayerTurn = true,
+      statusMessage = "Normal game",
+      unoSaid = false
+    )
+    val logic = new UnoLogic(state)
+    logic.sayUno()
+    logic.state.unoSaid should be(true)
+    logic.state.statusMessage should be("Du sagst UNO!")
+  }
+
+  it should "inflict a 2-card penalty when playing a card from a 2-card hand without saying UNO" in {
+    val state = GameState(
+      playerHand = Hand(List(Card(Colour.Red, Number.five), Card(Colour.Blue, Number.two))),
+      cpuHand = Hand(List(Card(Colour.Blue, Number.nine))),
+      pile = Card(Colour.Red, Number.zero),
+      activeColour = Colour.Red,
+      isPlayerTurn = true,
+      statusMessage = "Normal game",
+      unoSaid = false
+    )
+    val logic = new UnoLogic(state)
+    logic.executePlaceCard(Card(Colour.Red, Number.five))
+    logic.state.playerHand.count should be(3) // 2 cards original - 1 played + 2 penalty
+    logic.state.unoSaid should be(false)
+    logic.state.statusMessage should include("Strafkarten erhalten (UNO vergessen)!")
+  }
+
+  it should "not inflict penalty when playing from 2-card hand if UNO was said, and should reset unoSaid" in {
+    val state = GameState(
+      playerHand = Hand(List(Card(Colour.Red, Number.five), Card(Colour.Blue, Number.two))),
+      cpuHand = Hand(List(Card(Colour.Blue, Number.nine))),
+      pile = Card(Colour.Red, Number.zero),
+      activeColour = Colour.Red,
+      isPlayerTurn = true,
+      statusMessage = "Normal game",
+      unoSaid = true
+    )
+    val logic = new UnoLogic(state)
+    logic.executePlaceCard(Card(Colour.Red, Number.five))
+    logic.state.playerHand.count should be(1) // 2 cards original - 1 played = 1
+    logic.state.unoSaid should be(false)
+    logic.state.statusMessage should not include("Strafkarten erhalten")
+  }
+
+  it should "make CPU say UNO when CPU has 2 cards and plays 1 leaving it with 1" in {
+    val state = GameState(
+      playerHand = Hand(List(Card(Colour.Blue, Number.nine))),
+      cpuHand = Hand(List(Card(Colour.Red, Number.five), Card(Colour.Blue, Number.seven))),
+      pile = Card(Colour.Red, Number.zero),
+      activeColour = Colour.Red,
+      isPlayerTurn = false,
+      statusMessage = "CPU turn",
+      unoSaid = false
+    )
+    val logic = new UnoLogic(state)
+    logic.cpuTurn()
+    logic.state.cpuHand.count should be(1)
+    logic.state.statusMessage should include("und sagt UNO!")
+  }
 }
+

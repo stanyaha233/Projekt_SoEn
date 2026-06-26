@@ -21,5 +21,6 @@ lazy val root = project
     coverageExcludedFiles := ".*Main.*;.*UnoPlay.*;.*SwingGui.*",
     coverageExcludedPackages := "uno\\.gui\\..*;uno\\.aview\\..*",
     Test / parallelExecution := false,
-    Compile / mainClass := Some("uno.Main")
+    Compile / mainClass := Some("uno.Main"),
+    run / connectInput := true
   )

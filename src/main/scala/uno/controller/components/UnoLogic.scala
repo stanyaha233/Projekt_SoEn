@@ -63,7 +63,11 @@ class UnoLogic @Inject() (var state: GameStateInterface, val fileIO: FileIO)
     if (!canPlay(card)) {
       state = state.update(statusMessage = "Ungültiger Zug!")
     } else {
-      val newPlayerHand = new Hand(state.playerHand.cards.diff(List(card)))
+      val gotPenalty = state.playerHand.count == 2 && !state.unoSaid
+      val penaltyCards = if (gotPenalty) List(Draw.draw(), Draw.draw()) else Nil
+      val newPlayerHand = new Hand(state.playerHand.cards.diff(List(card)) ++ penaltyCards)
+      val penaltyMsg = if (gotPenalty) ". Strafkarten erhalten (UNO vergessen)!" else ""
+
       val nextColour =
         if (card.colour == Colour.Black) chosenColour.getOrElse(Colour.Red)
         else card.colour
@@ -96,8 +100,8 @@ class UnoLogic @Inject() (var state: GameStateInterface, val fileIO: FileIO)
         pile = card,
         activeColour = nextColour,
         isPlayerTurn = nextTurnIsPlayer,
-        statusMessage = s"Du legst ${card.colour} ${card.value}" + msgSuffix
-      )
+        statusMessage = s"Du legst ${card.colour} ${card.value}" + msgSuffix + penaltyMsg
+      ).updateUnoSaid(false)
     }
   }
 
@@ -123,6 +127,11 @@ class UnoLogic @Inject() (var state: GameStateInterface, val fileIO: FileIO)
 
   def drawCard(): Unit = {
     turnState.drawCard(this)
+  }
+
+  override def sayUno(): Unit = {
+    state = state.updateUnoSaid(true).update(statusMessage = "Du sagst UNO!")
+    notifyObservers()
   }
 
   def sortHandByColor(): Unit = {

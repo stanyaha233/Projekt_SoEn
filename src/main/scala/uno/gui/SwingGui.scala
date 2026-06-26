@@ -78,6 +78,10 @@ class SwingGui @Inject() (controller: ControllerInterface)
     reactions += { case ButtonClicked(_) => controller.drawCard() }
   }
 
+  private val unoButton = new Button("UNO") {
+    reactions += { case ButtonClicked(_) => controller.sayUno() }
+  }
+
   private val undoButton = new Button("Undo") {
     reactions += { case ButtonClicked(_) => controller.undo() }
   }
@@ -134,6 +138,8 @@ class SwingGui @Inject() (controller: ControllerInterface)
         }
         contents += Swing.HStrut(25)
         contents += drawButton
+        contents += Swing.HStrut(15)
+        contents += unoButton
         contents += Swing.HGlue
       }
       contents += pileAndDrawBox
@@ -179,6 +185,9 @@ class SwingGui @Inject() (controller: ControllerInterface)
     colourLabel.text = "Aktuelle Farbe: " + activeColorName
     colourLabel.foreground = getColor(activeColorName)
 
+    drawButton.enabled = controller.isPlayerTurn
+    unoButton.enabled = controller.isPlayerTurn
+
     updateCenterPanel()
 
     handPanel.contents.clear()
@@ -190,6 +199,7 @@ class SwingGui @Inject() (controller: ControllerInterface)
       handPanel.contents += new Button(buttonText) {
         background = btnColor; foreground = Color.WHITE; opaque = true;
         borderPainted = true
+        enabled = controller.isPlayerTurn
         reactions += { case ButtonClicked(_) => handleCardClick(card) }
       }
     }

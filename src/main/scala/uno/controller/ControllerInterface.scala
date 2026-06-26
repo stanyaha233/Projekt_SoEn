@@ -20,6 +20,7 @@ trait ControllerInterface extends Observable {
   def redo(): Unit
   def cpuTurn(): Unit
   def drawCard(): Unit
+  def sayUno(): Unit
   def sortHandByColor(): Unit
   def sortHandByValue(): Unit
   def setMessage(msg: String): Unit

@@ -82,6 +82,7 @@ class UnoPlay @Inject() (controller: ControllerInterface) extends Observer {
 
   def processInputLine(input: String): Unit = {
     input match {
+      case "uno"  => controller.sayUno()
       case "undo" => controller.undo()
       case "draw" => controller.drawCard()
       case "redo" => controller.redo()

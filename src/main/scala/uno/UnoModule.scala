@@ -45,7 +45,7 @@ class UnoModule extends AbstractModule {
       playerHand = playerHand,
       cpuHand = cpuHand,
       pile = initialPile,
-      activeColour = initialPile.colour,
+      activeColour = if (initialPile.colour == Colour.Black) Colour.Red else initialPile.colour,
       isPlayerTurn = true,
       statusMessage = "Willkommen bei UNO! Das Spiel beginnt mit 7 Karten."
     )

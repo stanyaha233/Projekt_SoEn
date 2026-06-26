@@ -16,13 +16,14 @@ trait GameStateInterface {
   def spielZugAusfuehren(card: Card): GameStateInterface
   def kartenSortieren(): GameStateInterface
   def copyState(): GameStateInterface
+  def updateUnoSaid(unoSaid: Boolean): GameStateInterface
 
   def update(
               playerHand: Hand = null,
               cpuHand: Hand = null,
               pile: Card = null,
               activeColour: Colour.Value = null,
-              isPlayerTurn: Boolean = false,
+              isPlayerTurn: java.lang.Boolean = null,
               statusMessage: String = null
             ): GameStateInterface
 }

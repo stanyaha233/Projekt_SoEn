@@ -35,16 +35,17 @@ case class GameState (
     this.copy(playerHand = Hand(sortierteListe))
   }
 
-  override def update(pH: Hand, cH: Hand, p: Card, col: Colour.Value, turn: Boolean, msg: String): GameState = {
+  override def update(pH: Hand, cH: Hand, p: Card, col: Colour.Value, turn: java.lang.Boolean, msg: String): GameState = {
     this.copy(
       playerHand = if (pH != null) pH else playerHand,
       cpuHand = if (cH != null) cH else cpuHand,
       pile = if (p != null) p else pile,
       activeColour = if (col != null) col else activeColour,
-      isPlayerTurn = turn,
+      isPlayerTurn = if (turn != null) turn.booleanValue() else isPlayerTurn,
       statusMessage = if (msg != null) msg else statusMessage
     )
   }
 
   override def copyState(): GameStateInterface = this.copy()
+  override def updateUnoSaid(newUnoSaid: Boolean): GameState = this.copy(unoSaid = newUnoSaid)
 }

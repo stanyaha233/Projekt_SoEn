@@ -6,19 +6,19 @@ import scala.util.{Success, Failure, Try}
 //State Pattern
 trait TurnState {
   def playCard(
-                controller: UnoLogic,
-                card: Card,
-                chosenColour: Option[Colour.Value] = None
-              ): Unit
+      controller: UnoLogic,
+      card: Card,
+      chosenColour: Option[Colour.Value] = None
+  ): Unit
   def drawCard(controller: UnoLogic): Unit
   def cpuTurn(controller: UnoLogic): Unit
 }
 object PlayerTurnState extends TurnState {
   override def playCard(
-                         controller: UnoLogic,
-                         card: Card,
-                         chosenColour: Option[Colour.Value] = None
-                       ): Unit = {
+      controller: UnoLogic,
+      card: Card,
+      chosenColour: Option[Colour.Value] = None
+  ): Unit = {
     if (controller.canPlay(card)) {
       controller.executePlaceCardCommand(card, chosenColour)
       if (!controller.state.isPlayerTurn) {
@@ -59,10 +59,11 @@ object PlayerTurnState extends TurnState {
 }
 
 object CpuTurnState extends TurnState {
-  override def playCard( controller: UnoLogic,
-                         card: Card,
-                         chosenColour: Option[Colour.Value] = None
-                       ): Unit = {}
+  override def playCard(
+      controller: UnoLogic,
+      card: Card,
+      chosenColour: Option[Colour.Value] = None
+  ): Unit = {}
 
   override def drawCard(controller: UnoLogic): Unit = {
     val drawResult = Try(Draw.draw())
@@ -107,13 +108,15 @@ object CpuTurnState extends TurnState {
           case _ => nextTurnIsPlayer = true
         }
 
+        val cpuUnoMsg = if (newCpuHand.count == 1) " und sagt UNO!" else ""
         controller.state = controller.state.update(
           cpuHand = newCpuHand,
           playerHand = controller.autoSort(newPlayerHand),
           pile = card,
           activeColour = nextColour,
           isPlayerTurn = nextTurnIsPlayer,
-          statusMessage = s"Gegner legt ${card.colour} ${card.value}"
+          statusMessage =
+            s"Gegner legt ${card.colour} ${card.value}" + cpuUnoMsg
         )
 
         if (nextTurnIsPlayer) {
@@ -121,6 +124,9 @@ object CpuTurnState extends TurnState {
           controller.notifyObservers()
         } else {
           controller.notifyObservers()
+          if (controller.isGameActive) {
+            controller.cpuTurn()
+          }
         }
       case None =>
         drawCard(controller)

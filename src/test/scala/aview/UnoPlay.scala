@@ -17,7 +17,8 @@ class UnoPlaySpec extends AnyFlatSpec with Matchers {
       cpuHand = new Hand(List(extraCard)),
       pile = Card(Colour.Red, Number.zero),
       activeColour = Colour.Red,
-      isPlayerTurn = true
+      isPlayerTurn = true,
+      unoSaid = true
     )
     val controller: ControllerInterface = new UnoLogic(state)
     val tui = new UnoPlay(controller)
@@ -71,7 +72,8 @@ class UnoPlaySpec extends AnyFlatSpec with Matchers {
       cpuHand = new Hand(List(extraCard)),
       pile = Card(Colour.Red, Number.zero),
       activeColour = Colour.Red,
-      isPlayerTurn = true
+      isPlayerTurn = true,
+      unoSaid = true
     )
     val controller: ControllerInterface = new UnoLogic(state)
     val tui = new UnoPlay(controller)
@@ -130,7 +132,8 @@ class UnoPlaySpec extends AnyFlatSpec with Matchers {
       cpuHand = new Hand(List(extraCard)),
       pile = Card(Colour.Red, Number.zero),
       activeColour = Colour.Red,
-      isPlayerTurn = true
+      isPlayerTurn = true,
+      unoSaid = true
     )
     val controller: ControllerInterface = new UnoLogic(state)
     val tui = new UnoPlay(controller)
@@ -156,7 +159,8 @@ class UnoPlaySpec extends AnyFlatSpec with Matchers {
       cpuHand = new Hand(List(extraCard)),
       pile = Card(Colour.Red, Number.zero),
       activeColour = Colour.Red,
-      isPlayerTurn = true
+      isPlayerTurn = true,
+      unoSaid = true
     )
     val controller: ControllerInterface = new UnoLogic(state)
     val tui = new UnoPlay(controller)
