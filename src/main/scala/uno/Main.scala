@@ -23,15 +23,19 @@ object Main {
 
     val tuiThread = new Thread(new Runnable {
       override def run(): Unit = {
-        while (controller.state.isGameActive) {
-          if (controller.state.isPlayerTurn) {
-            val input = StdIn.readLine("Zug (Farbe Wert) oder 'draw': ")
-            if (input != null) {
-              tui.processInputLine(input.trim.toLowerCase)
+        while (gui.visible || controller.state.isGameActive) {
+          if (controller.state.isGameActive) {
+            if (controller.state.isPlayerTurn) {
+              val input = StdIn.readLine("Zug (Farbe Wert) oder 'draw': ")
+              if (input != null) {
+                tui.processInputLine(input.trim.toLowerCase)
+              }
+            } else {
+              Thread.sleep(1000)
+              controller.cpuTurn()
             }
           } else {
-            Thread.sleep(1000)
-            controller.cpuTurn()
+            Thread.sleep(250)
           }
         }
       }
@@ -40,7 +44,7 @@ object Main {
     tuiThread.start()
 
     // Keep the main thread alive so sbt run doesn't exit immediately
-    while (controller.state.isGameActive) {
+    while (gui.visible || controller.state.isGameActive) {
       Thread.sleep(250)
     }
   }
