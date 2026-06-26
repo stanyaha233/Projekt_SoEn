@@ -1,5 +1,6 @@
 package uno.gui
 
+// $COVERAGE-OFF$
 import com.google.inject.Inject
 import scala.swing._
 import scala.swing.event._
@@ -161,8 +162,7 @@ class SwingGui @Inject() (controller: ControllerInterface)
       controller.cpuHandCards.foreach(_.accept(cpuVisitor))
 
       val winMsg = if (controller.playerHandCount == 0) "Du hast gewonnen!" else "Der Gegner hat gewonnen!"
-      val scoreMsg = s"\n\nDein Score: ${playerVisitor.score} Punkte\nGegner Score: ${cpuVisitor.score} Punkte"
-
+      val scoreMsg = s"\n\nDein Runden-Score: ${playerVisitor.score} Punkte (Gesamt: ${controller.playerTotalScore})\nGegner Runden-Score: ${cpuVisitor.score} Punkte (Gesamt: ${controller.cpuTotalScore})"
       handleGameOver(winMsg + scoreMsg)
     }
 

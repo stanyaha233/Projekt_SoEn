@@ -9,6 +9,8 @@ trait ControllerInterface extends Observable {
   def cpuHandCards: List[Card]
   def playerHandCount: Int
   def cpuHandCount: Int
+  def playerTotalScore: Int
+  def cpuTotalScore: Int
   def pileCard: Card
   def activeColour: Colour.Value
   def isPlayerTurn: Boolean

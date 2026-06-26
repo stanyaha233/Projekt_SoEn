@@ -24,6 +24,8 @@ class UnoLogic @Inject() (var state: GameStateInterface, val fileIO: FileIO)
   private val undoManager = new UndoManager()
   var turnState: TurnState =
     if (state.isPlayerTurn) PlayerTurnState else CpuTurnState
+  var playerTotalScore: Int = 0
+  var cpuTotalScore: Int = 0
 
   def syncTurnState(): Unit = {
     turnState = if (state.isPlayerTurn) PlayerTurnState else CpuTurnState
@@ -162,7 +164,9 @@ class UnoLogic @Inject() (var state: GameStateInterface, val fileIO: FileIO)
         .mkString(","),
       "cpuHand" -> state.cpuHand.cards
         .map(c => s"${c.colour}:${c.value}")
-        .mkString(",")
+        .mkString(","),
+      "playerTotalScore" -> playerTotalScore.toString,
+      "cpuTotalScore" -> cpuTotalScore.toString
     )
     fileIO.save(data, filename)
     state =
@@ -200,6 +204,8 @@ class UnoLogic @Inject() (var state: GameStateInterface, val fileIO: FileIO)
       val loadedStatusMessage =
         data.getOrElse("statusMessage", "Spiel geladen!")
       val loadedUnoSaid = data.getOrElse("unoSaid", "false").toBoolean
+      playerTotalScore = data.getOrElse("playerTotalScore", "0").toInt
+      cpuTotalScore = data.getOrElse("cpuTotalScore", "0").toInt
 
       state = GameState(
         playerHand = Hand(playerHandCards),
@@ -230,10 +236,16 @@ class UnoLogic @Inject() (var state: GameStateInterface, val fileIO: FileIO)
   override def cpuHandCards: List[Card] = state.cpuHand.cards
 
   override def restart(): Unit = {
+    if (state.playerHand.count == 0) {
+      playerTotalScore += calculateHandScore(state.cpuHand)
+    } else if (state.cpuHand.count == 0) {
+      cpuTotalScore += calculateHandScore(state.playerHand)
+    }
+
     val initialState: GameStateInterface =
       uno.util.GameFactory.createInitialState()
     state = initialState.update(
-      statusMessage = "Spiel neu gestartet!",
+      statusMessage = s"Spiel neu gestartet! Gesamtstand - Du: $playerTotalScore, Gegner: $cpuTotalScore",
       isPlayerTurn = initialState.isPlayerTurn
     )
     syncTurnState()

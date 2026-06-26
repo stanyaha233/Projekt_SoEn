@@ -121,4 +121,68 @@ class UnoPlaySpec extends AnyFlatSpec with Matchers {
     // Nachdem der Spieler zieht, legt die CPU ihre Red 1 und gewinnt.
     controller.state.cpuHand.count should be(0)
   }
+
+  it should "handle black cards and fallback to red if input is empty" in {
+    val myCard = Card(Colour.Black, Number.choice)
+    val extraCard = Card(Colour.Blue, Number.one)
+    val state = GameState(
+      playerHand = new Hand(List(myCard, extraCard)),
+      cpuHand = new Hand(List(extraCard)),
+      pile = Card(Colour.Red, Number.zero),
+      activeColour = Colour.Red,
+      isPlayerTurn = true
+    )
+    val controller: ControllerInterface = new UnoLogic(state)
+    val tui = new UnoPlay(controller)
+    
+    val in = new java.io.ByteArrayInputStream("\n".getBytes)
+    val originalIn = System.in
+    try {
+      System.setIn(in)
+      Console.withIn(in) {
+        tui.processInputLine("black choice")
+      }
+    } finally {
+      System.setIn(originalIn)
+    }
+    controller.state.activeColour should be (Colour.Red)
+  }
+
+  it should "handle TUI commands like undo, redo, save, and load" in {
+    val myCard = Card(Colour.Red, Number.five)
+    val extraCard = Card(Colour.Blue, Number.one)
+    val state = GameState(
+      playerHand = new Hand(List(myCard, extraCard)),
+      cpuHand = new Hand(List(extraCard)),
+      pile = Card(Colour.Red, Number.zero),
+      activeColour = Colour.Red,
+      isPlayerTurn = true
+    )
+    val controller: ControllerInterface = new UnoLogic(state)
+    val tui = new UnoPlay(controller)
+
+    // Play card
+    tui.processInputLine("red five")
+    controller.state.playerHand.count should be(1)
+
+    // Undo
+    tui.processInputLine("undo")
+    controller.state.playerHand.count should be(2)
+
+    // Redo
+    tui.processInputLine("redo")
+    controller.state.playerHand.count should be(1)
+
+    // Save
+    tui.processInputLine("save")
+    controller.state.statusMessage should include("gespeichert")
+
+    // Load
+    tui.processInputLine("load")
+    controller.state.statusMessage should be("Du legst Red five")
+
+    // Clean up save game file
+    val filename = s"savegame.${sys.props.getOrElse("uno.fileio", "json")}"
+    new java.io.File(filename).delete()
+  }
 }
