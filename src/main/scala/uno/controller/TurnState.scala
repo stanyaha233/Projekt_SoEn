@@ -121,7 +121,6 @@ object CpuTurnState extends TurnState {
           controller.notifyObservers()
         } else {
           controller.notifyObservers()
-          controller.cpuTurn()
         }
       case None =>
         drawCard(controller)
