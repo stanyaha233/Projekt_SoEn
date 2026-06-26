@@ -6,19 +6,19 @@ import scala.util.{Success, Failure, Try}
 //State Pattern
 trait TurnState {
   def playCard(
-      controller: UnoLogic,
-      card: Card,
-      chosenColour: Option[Colour.Value] = None
-  ): Unit
+                controller: UnoLogic,
+                card: Card,
+                chosenColour: Option[Colour.Value] = None
+              ): Unit
   def drawCard(controller: UnoLogic): Unit
   def cpuTurn(controller: UnoLogic): Unit
 }
 object PlayerTurnState extends TurnState {
   override def playCard(
-      controller: UnoLogic,
-      card: Card,
-      chosenColour: Option[Colour.Value] = None
-  ): Unit = {
+                         controller: UnoLogic,
+                         card: Card,
+                         chosenColour: Option[Colour.Value] = None
+                       ): Unit = {
     if (controller.canPlay(card)) {
       controller.executePlaceCardCommand(card, chosenColour)
       if (!controller.state.isPlayerTurn) {
@@ -59,11 +59,10 @@ object PlayerTurnState extends TurnState {
 }
 
 object CpuTurnState extends TurnState {
-  override def playCard(
-      controller: UnoLogic,
-      card: Card,
-      chosenColour: Option[Colour.Value] = None
-  ): Unit = {}
+  override def playCard( controller: UnoLogic,
+                         card: Card,
+                         chosenColour: Option[Colour.Value] = None
+                       ): Unit = {}
 
   override def drawCard(controller: UnoLogic): Unit = {
     val drawResult = Try(Draw.draw())
@@ -122,6 +121,7 @@ object CpuTurnState extends TurnState {
           controller.notifyObservers()
         } else {
           controller.notifyObservers()
+          controller.cpuTurn()
         }
       case None =>
         drawCard(controller)
