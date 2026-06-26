@@ -42,6 +42,27 @@ class SwingGui @Inject() (controller: ControllerInterface)
   title = "Uno GUI"
   minimumSize = new Dimension(700, 450)
 
+  menuBar = new MenuBar {
+    contents += new Menu("Menü") {
+      contents += new Menu("Spiel") {
+        contents += new MenuItem(Action("Speichern") {
+          controller.save()
+        })
+        contents += new MenuItem(Action("Laden") {
+          controller.load()
+        })
+      }
+      contents += new Menu("Bearbeite") {
+        contents += new MenuItem(Action("Undo") {
+          controller.undo()
+        })
+        contents += new MenuItem(Action("Redo") {
+          controller.redo()
+        })
+      }
+    }
+  }
+
   private val cpuLabel = new Label(
     "Gegner hat: " + controller.cpuHandCount + " Karten"
   )
@@ -122,27 +143,6 @@ class SwingGui @Inject() (controller: ControllerInterface)
       colourLabel.xLayoutAlignment = java.awt.Component.CENTER_ALIGNMENT
       contents += colourLabel
       contents += Swing.VStrut(15)
-
-      // Row 2: Undo and Redo
-      val actionBox = new BoxPanel(Orientation.Horizontal) {
-        contents += Swing.HGlue
-        contents += undoButton
-        contents += Swing.HStrut(15)
-        contents += redoButton
-        contents += Swing.HGlue
-      }
-      contents += actionBox
-      contents += Swing.VStrut(10)
-
-      // Row 3: Save and Load
-      val fileBox = new BoxPanel(Orientation.Horizontal) {
-        contents += Swing.HGlue
-        contents += saveButton
-        contents += Swing.HStrut(15)
-        contents += loadButton
-        contents += Swing.HGlue
-      }
-      contents += fileBox
 
       contents += Swing.VGlue
     }
