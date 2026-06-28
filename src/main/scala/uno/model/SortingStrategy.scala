@@ -10,3 +10,5 @@ class SortByColorStrategy extends SortingStrategy:
 class SortByValueStrategy extends SortingStrategy:
   def sort(hand: List[Card]): List[Card] =
     hand.sortBy(card => (card.value, card.colour))
+
+

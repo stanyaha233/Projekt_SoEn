@@ -24,6 +24,8 @@ trait GameStateInterface {
               pile: Card = null,
               activeColour: Colour.Value = null,
               isPlayerTurn: java.lang.Boolean = null,
-              statusMessage: String = null
+              statusMessage: String = null,
+              playerTotalScore: Int = 0, 
+              cpuTotalScore: Int = 0
             ): GameStateInterface
 }

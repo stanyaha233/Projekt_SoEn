@@ -171,6 +171,7 @@ class SwingGui @Inject() (controller: ControllerInterface)
       val scoreMsg = s"\n\nDein Runden-Score: ${playerVisitor.score} Punkte (Gesamt: ${controller.playerTotalScore})\nGegner Runden-Score: ${cpuVisitor.score} Punkte (Gesamt: ${controller.cpuTotalScore})"
       handleGameOver(winMsg + scoreMsg)
     }
+    scoreLabel.text = s"Deine Punkte: ${controller.playerTotalScore} | Gegner Punkte: ${controller.cpuTotalScore}"
 
     statusLabel.text = controller.state.statusMessage
     cpuLabel.text = "Gegner hat: " + controller.cpuHandCount + " Karten"

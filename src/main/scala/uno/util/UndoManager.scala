@@ -12,7 +12,7 @@ class UndoManager {
 
   def undo(): Unit = {
     undoStack match {
-      case Nil => // nichts
+      case Nil =>
       case command :: stack =>
         command.undo()
         undoStack = stack

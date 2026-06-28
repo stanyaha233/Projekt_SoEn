@@ -13,6 +13,7 @@ trait TurnState {
   def drawCard(controller: UnoLogic): Unit
   def cpuTurn(controller: UnoLogic): Unit
 }
+
 object PlayerTurnState extends TurnState {
   override def playCard(
       controller: UnoLogic,

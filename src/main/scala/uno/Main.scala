@@ -7,15 +7,24 @@ import uno.controller.ControllerInterface
 import uno.gui.SwingGui
 import javax.swing.UIManager
 import scala.io.StdIn
+import com.google.inject.Guice
 
 object Main {
   def main(args: Array[String]): Unit = {
-    UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName)
 
-    val injector = com.google.inject.Guice.createInjector(new UnoModule)
+    val gui: Option[SwingGui] = try {
+      UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName)
+      val injector = Guice.createInjector(new UnoModule)
+      Some(injector.getInstance(classOf[SwingGui]))
+    } catch {
+      case e: Exception =>
+        println("Info: GUI konnte nicht gestartet werden (Headless-Modus).")
+        None
+    }
+
+    val injector = Guice.createInjector(new UnoModule)
     val controller = injector.getInstance(classOf[ControllerInterface])
     val tui = injector.getInstance(classOf[UnoPlay])
-    val gui = injector.getInstance(classOf[SwingGui])
 
     println("=== Willkommen zu UNO ===")
 
@@ -23,7 +32,7 @@ object Main {
 
     val tuiThread = new Thread(new Runnable {
       override def run(): Unit = {
-        while (gui.visible || controller.state.isGameActive) {
+        while (gui.exists(_.visible) || controller.state.isGameActive) {
           if (controller.state.isGameActive) {
             if (controller.state.isPlayerTurn) {
               val input = StdIn.readLine("Zug (Farbe Wert) oder 'draw': ")
@@ -43,8 +52,7 @@ object Main {
     tuiThread.setDaemon(true)
     tuiThread.start()
 
-    // Keep the main thread alive so sbt run doesn't exit immediately
-    while (gui.visible || controller.state.isGameActive) {
+    while (gui.exists(_.visible) || controller.state.isGameActive) {
       Thread.sleep(250)
     }
   }

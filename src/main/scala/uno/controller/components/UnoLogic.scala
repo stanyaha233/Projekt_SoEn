@@ -255,9 +255,20 @@ class UnoLogic @Inject() (var state: GameStateInterface, val fileIO: FileIO)
       uno.util.GameFactory.createInitialState()
     state = initialState.update(
       statusMessage = s"Spiel neu gestartet! Gesamtstand - Du: $playerTotalScore, Gegner: $cpuTotalScore",
-      isPlayerTurn = initialState.isPlayerTurn
+      isPlayerTurn = initialState.isPlayerTurn,
+      playerTotalScore = playerTotalScore, 
+      cpuTotalScore = cpuTotalScore
     )
     syncTurnState()
     notifyObservers()
   }
 }
+
+
+
+
+
+
+
+
+
